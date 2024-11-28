@@ -27,17 +27,8 @@ export const ChatPolicies = {
   MAX_MESSAGES_PER_DAY: 100,
 };
 
-export const validateTrainingArts = (arts: string[]): TrainingArt[] => {
-  const validArts: TrainingArt[] = ["BJJ", "Wrestling", "Submission Grappling"];
-  return arts.filter((art): art is TrainingArt =>
-    validArts.includes(art as TrainingArt)
-  );
-};
-
-export const validateMember = (member: Partial<Member>): string[] => {
+const validateRequiredFields = (member: Partial<Member>): string[] => {
   const errors: string[] = [];
-
-  // Required fields
   const requiredFields = [
     "username",
     "email",
@@ -52,120 +43,170 @@ export const validateMember = (member: Partial<Member>): string[] => {
       errors.push(`${field} is required`);
     }
   });
+  return errors;
+};
 
-  // Username validation
-  if (member.username) {
-    if (member.username.length < MemberPolicies.MIN_USERNAME_LENGTH) {
-      errors.push(
-        `Username must be at least ${MemberPolicies.MIN_USERNAME_LENGTH} characters long`
-      );
-    }
-    if (member.username.length > MemberPolicies.MAX_USERNAME_LENGTH) {
-      errors.push(
-        `Username must be less than ${MemberPolicies.MAX_USERNAME_LENGTH} characters long`
-      );
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(member.username)) {
-      errors.push(
-        "Username can only contain letters, numbers, and underscores"
-      );
-    }
+const validateUsername = (username?: string): string[] => {
+  const errors: string[] = [];
+  if (!username) return errors;
+
+  if (username.length < MemberPolicies.MIN_USERNAME_LENGTH) {
+    errors.push(
+      `Username must be at least ${MemberPolicies.MIN_USERNAME_LENGTH} characters long`
+    );
+  }
+  if (username.length > MemberPolicies.MAX_USERNAME_LENGTH) {
+    errors.push(
+      `Username must be less than ${MemberPolicies.MAX_USERNAME_LENGTH} characters long`
+    );
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    errors.push("Username can only contain letters, numbers, and underscores");
+  }
+  return errors;
+};
+
+const validateEmail = (email?: string): string[] => {
+  const errors: string[] = [];
+  if (!email) return errors;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    errors.push("Invalid email format");
+  }
+  return errors;
+};
+
+const validateDateOfBirth = (dateOfBirth?: string): string[] => {
+  const errors: string[] = [];
+  if (!dateOfBirth) return errors;
+
+  const dob = new Date(dateOfBirth);
+  if (isNaN(dob.getTime())) {
+    errors.push("Invalid date of birth");
+    return errors;
   }
 
-  // Email validation
-  if (member.email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(member.email)) {
-      errors.push("Invalid email format");
-    }
+  const now = new Date();
+  const age = now.getFullYear() - dob.getFullYear();
+
+  if (age < MemberPolicies.MIN_AGE) {
+    errors.push(`Must be at least ${MemberPolicies.MIN_AGE} years old`);
   }
-
-  // Date validations
-  if (member.dateOfBirth) {
-    const dob = new Date(member.dateOfBirth);
-    const now = new Date();
-    const age = now.getFullYear() - dob.getFullYear();
-
-    if (isNaN(dob.getTime())) {
-      errors.push("Invalid date of birth");
-    } else if (age < MemberPolicies.MIN_AGE) {
-      errors.push(`Must be at least ${MemberPolicies.MIN_AGE} years old`);
-    } else if (age > MemberPolicies.MAX_AGE) {
-      errors.push("Invalid age");
-    }
-  }
-
-  if (member.trainingStartDate) {
-    const startDate = new Date(member.trainingStartDate);
-    const now = new Date();
-
-    if (isNaN(startDate.getTime())) {
-      errors.push("Invalid training start date");
-    } else if (startDate > now) {
-      errors.push("Training start date cannot be in the future");
-    }
-  }
-
-  // Training arts validation
-  if (member.trainingArts) {
-    const validArts = ["BJJ", "Wrestling", "Submission Grappling"];
-    member.trainingArts.forEach((art) => {
-      if (!validArts.includes(art)) {
-        errors.push(`Invalid training art: ${art}`);
-      }
-    });
-  }
-
-  // Bio validation
-  if (member.bio) {
-    if (member.bio.length < MemberPolicies.MIN_BIO_LENGTH) {
-      errors.push(
-        `Bio must be at least ${MemberPolicies.MIN_BIO_LENGTH} characters long`
-      );
-    }
-    if (member.bio.length > MemberPolicies.MAX_BIO_LENGTH) {
-      errors.push(
-        `Bio must be less than ${MemberPolicies.MAX_BIO_LENGTH} characters long`
-      );
-    }
-  }
-
-  // Weight validation
-  if (member.weight) {
-    if (member.weight.value <= 0) {
-      errors.push("Weight must be greater than 0");
-    }
-    if (!["kg", "lbs"].includes(member.weight.unit)) {
-      errors.push("Invalid weight unit");
-    }
-  }
-
-  // Height validation
-  if (member.height) {
-    if (member.height.value <= 0) {
-      errors.push("Height must be greater than 0");
-    }
-    if (!["cm", "ft"].includes(member.height.unit)) {
-      errors.push("Invalid height unit");
-    }
-  }
-
-  // Privacy settings validation
-  if (member.privacySettings) {
-    type PrivacyKey = keyof Member["privacySettings"];
-    const requiredSettings: PrivacyKey[] = [
-      "ageVisibility",
-      "weightVisibility",
-      "heightVisibility",
-      "connectionsVisibility",
-    ];
-
-    requiredSettings.forEach((setting) => {
-      if (typeof member.privacySettings?.[setting] !== "boolean") {
-        errors.push(`Invalid ${setting} setting`);
-      }
-    });
+  if (age > MemberPolicies.MAX_AGE) {
+    errors.push("Invalid age");
   }
 
   return errors;
+};
+
+const validateTrainingStartDate = (trainingStartDate?: string): string[] => {
+  const errors: string[] = [];
+  if (!trainingStartDate) return errors;
+
+  const startDate = new Date(trainingStartDate);
+  if (isNaN(startDate.getTime())) {
+    errors.push("Invalid training start date");
+    return errors;
+  }
+
+  const now = new Date();
+  if (startDate > now) {
+    errors.push("Training start date cannot be in the future");
+  }
+
+  return errors;
+};
+
+export const validateTrainingArts = (arts: string[]): TrainingArt[] => {
+  const validArts: TrainingArt[] = ["BJJ", "Wrestling", "Submission Grappling"];
+  return arts.filter((art): art is TrainingArt =>
+    validArts.includes(art as TrainingArt)
+  );
+};
+
+const validateTrainingArtsArray = (arts?: TrainingArt[]): string[] => {
+  const errors: string[] = [];
+  if (!arts) return errors;
+
+  const validArts = ["BJJ", "Wrestling", "Submission Grappling"];
+  arts.forEach((art) => {
+    if (!validArts.includes(art)) {
+      errors.push(`Invalid training art: ${art}`);
+    }
+  });
+  return errors;
+};
+
+const validateBio = (bio?: string): string[] => {
+  const errors: string[] = [];
+  if (!bio) return errors;
+
+  if (bio.length < MemberPolicies.MIN_BIO_LENGTH) {
+    errors.push(
+      `Bio must be at least ${MemberPolicies.MIN_BIO_LENGTH} characters long`
+    );
+  }
+  if (bio.length > MemberPolicies.MAX_BIO_LENGTH) {
+    errors.push(
+      `Bio must be less than ${MemberPolicies.MAX_BIO_LENGTH} characters long`
+    );
+  }
+  return errors;
+};
+
+const validateMeasurement = (
+  value: { value: number; unit: string } | undefined,
+  type: "weight" | "height"
+): string[] => {
+  const errors: string[] = [];
+  if (!value) return errors;
+
+  if (value.value <= 0) {
+    errors.push(`${type} must be greater than 0`);
+  }
+
+  const validUnits = type === "weight" ? ["kg", "lbs"] : ["cm", "ft"];
+  if (!validUnits.includes(value.unit)) {
+    errors.push(`Invalid ${type} unit`);
+  }
+
+  return errors;
+};
+
+const validatePrivacySettings = (
+  settings?: Member["privacySettings"]
+): string[] => {
+  const errors: string[] = [];
+  if (!settings) return errors;
+
+  const requiredSettings = [
+    "ageVisibility",
+    "weightVisibility",
+    "heightVisibility",
+    "connectionsVisibility",
+  ] as const;
+
+  requiredSettings.forEach((setting) => {
+    if (typeof settings[setting] !== "boolean") {
+      errors.push(`Invalid ${setting} setting`);
+    }
+  });
+
+  return errors;
+};
+
+export const validateMember = (member: Partial<Member>): string[] => {
+  return [
+    ...validateRequiredFields(member),
+    ...validateUsername(member.username),
+    ...validateEmail(member.email),
+    ...validateDateOfBirth(member.dateOfBirth),
+    ...validateTrainingStartDate(member.trainingStartDate),
+    ...validateTrainingArtsArray(member.trainingArts),
+    ...validateBio(member.bio),
+    ...validateMeasurement(member.weight, "weight"),
+    ...validateMeasurement(member.height, "height"),
+    ...validatePrivacySettings(member.privacySettings),
+  ];
 };

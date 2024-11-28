@@ -1,87 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import MemberProfile from "./components/members/MemberProfile";
-import MembersPage from "./pages/Members";
-import Settings from "./pages/Settings";
-import MemberNav from "./components/navigation/MemberNav";
-import { ThemeProvider, ThemeToggle } from "./context/ThemeContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { ConnectionsProvider } from "./context/ConnectionsContext";
 import { useMember } from "./hooks/useMember";
 import storageService from "./services/storage";
-
-// Role-based components
-const SuperAdminDashboard = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="p-6 bg-base-200"
-  >
-    <h1 className="text-2xl font-bold">Super Admin Dashboard</h1>
-    <p>Complete system control and management</p>
-  </motion.div>
-);
-
-const AdminDashboard = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="p-6 bg-base-200"
-  >
-    <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-    <p>System administration and oversight</p>
-  </motion.div>
-);
-
-const PartnerDashboard = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="p-6 bg-base-200"
-  >
-    <h1 className="text-2xl font-bold">Partner Dashboard</h1>
-    <p>Partnership management and collaboration tools</p>
-  </motion.div>
-);
-
-interface MemberDashboardProps {
-  currentUserId: string;
-}
-
-const MemberDashboard: React.FC<MemberDashboardProps> = ({ currentUserId }) => {
-  const { getMemberById } = useMember(currentUserId);
-  const member = getMemberById(currentUserId);
-
-  if (!member) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="p-6 bg-base-200"
-    >
-      <h1 className="text-2xl font-bold mb-6">Member Dashboard</h1>
-      <div className="mt-6">
-        <MemberProfile
-          currentUserId={currentUserId}
-          member={member}
-          isOwnProfile={true}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-const UserDashboard = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="p-6 bg-base-200"
-  >
-    <h1 className="text-2xl font-bold">User Dashboard</h1>
-    <p>Basic user features and access</p>
-  </motion.div>
-);
+import RoleBasedRoutes from "./components/routing/RoleBasedRoutes";
 
 // Role selection component
 const RoleSelector = ({
@@ -119,71 +42,92 @@ const RoleSelector = ({
 
 const AppContent: React.FC = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const currentUserId = "1"; // Using ID "1" to match dummy data
+  const notificationCount = 3; // Example notification count
+  const { getMemberById } = useMember(currentUserId);
+  const currentMember = getMemberById(currentUserId);
 
   // Reset storage and reinitialize on first load
   useEffect(() => {
     storageService.resetStorage();
   }, []);
 
-  if (!userRole) {
+  if (!userRole || !currentMember) {
     return <RoleSelector onRoleSelect={setUserRole} />;
   }
 
   return (
     <div className="min-h-screen bg-base-200">
-      <div className="navbar bg-base-100 shadow-lg">
-        <div className="navbar-start">
-          <span className="text-xl font-semibold">Role-Based App</span>
+      <div className="navbar bg-base-100 shadow-lg px-4">
+        <div className="flex-1 flex items-center gap-2">
+          <div className="flex items-center h-12">
+            <img src="/DOJOLIBRE_LOGO2.svg" alt="DOJOLIBRE" className="h-8" />
+            <span className="text-2xl font-extrabold italic ml-2">
+              DOJOLIBRE
+            </span>
+          </div>
         </div>
-        <div className="navbar-end">
-          <span className="badge badge-lg mr-2">
-            {userRole === "superadmin" ? "Super Admin" : userRole} Role
-          </span>
-          <ThemeToggle />
-          <button
-            onClick={() => setUserRole(null)}
-            className="btn btn-ghost btn-sm ml-2"
-          >
-            Switch Role
+        <div className="flex items-center gap-4">
+          {/* Bell Icon with Notification Count */}
+          <button className="btn btn-ghost h-12 w-12 flex items-center justify-center relative">
+            <div className="relative flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 24 24"
+                fill={notificationCount > 0 ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth={notificationCount > 0 ? "0" : "2"}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              {notificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-error text-error-content w-5 h-5 flex items-center justify-center text-xs font-bold rounded-full">
+                  {notificationCount}
+                </span>
+              )}
+            </div>
           </button>
+
+          {/* Profile Dropdown */}
+          <div className="dropdown dropdown-end">
+            <label
+              tabIndex={0}
+              className="btn btn-ghost h-12 w-12 p-0"
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+            >
+              <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-base-300">
+                <img
+                  src={currentMember.profilePhoto || "/default-avatar.png"}
+                  alt="profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </label>
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <a>Profile</a>
+              </li>
+              <li>
+                <a>Settings</a>
+              </li>
+              <li>
+                <a onClick={() => setUserRole(null)}>Switch Role</a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <main className="container mx-auto py-6 px-4">
-        {userRole === "member" && <MemberNav />}
-        <Routes>
-          {userRole === "superadmin" && (
-            <Route path="/superadmin" element={<SuperAdminDashboard />} />
-          )}
-          {userRole === "admin" && (
-            <Route path="/admin" element={<AdminDashboard />} />
-          )}
-          {userRole === "partner" && (
-            <Route path="/partner" element={<PartnerDashboard />} />
-          )}
-          {userRole === "member" && (
-            <>
-              <Route
-                path="/member"
-                element={<MemberDashboard currentUserId={currentUserId} />}
-              />
-              <Route
-                path="/members/*"
-                element={<MembersPage currentUserId={currentUserId} />}
-              />
-              <Route
-                path="/settings"
-                element={<Settings currentUserId={currentUserId} />}
-              />
-            </>
-          )}
-          {userRole === "user" && (
-            <Route path="/user" element={<UserDashboard />} />
-          )}
-          <Route path="*" element={<Navigate to={`/${userRole}`} replace />} />
-        </Routes>
-      </main>
+      <RoleBasedRoutes userRole={userRole} currentUserId={currentUserId} />
     </div>
   );
 };

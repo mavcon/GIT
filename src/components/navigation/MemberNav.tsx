@@ -18,7 +18,7 @@ const MemberNav: React.FC = () => {
             : ""
         }`}
       >
-        Dashboard
+        Profile
       </Link>
       <Link
         to="/members"

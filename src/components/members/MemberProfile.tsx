@@ -212,6 +212,7 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
             : member
         }
         isOwnProfile={isOwnProfile}
+        isEditable={isOwnProfile}
         onEdit={isOwnProfile ? handleEdit : undefined}
         onPhotoUpload={isOwnProfile ? handlePhotoUpload : undefined}
         onTrainingArtsChange={(arts) => handleFieldChange("trainingArts", arts)}
