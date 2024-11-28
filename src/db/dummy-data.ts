@@ -17,8 +17,6 @@ export const dummyMembers: DBMember[] = [
     height_value: 175,
     height_unit: "cm",
     privacy_settings: {
-      profile_visibility: true,
-      metrics_visibility: true,
       age_visibility: true,
       weight_visibility: true,
       height_visibility: true,
@@ -45,8 +43,6 @@ export const dummyMembers: DBMember[] = [
     height_value: 165,
     height_unit: "cm",
     privacy_settings: {
-      profile_visibility: true,
-      metrics_visibility: true,
       age_visibility: true,
       weight_visibility: true,
       height_visibility: true,
@@ -73,8 +69,6 @@ export const dummyMembers: DBMember[] = [
     height_value: 180,
     height_unit: "cm",
     privacy_settings: {
-      profile_visibility: true,
-      metrics_visibility: true,
       age_visibility: true,
       weight_visibility: true,
       height_visibility: true,
@@ -101,8 +95,6 @@ export const dummyMembers: DBMember[] = [
     height_value: 170,
     height_unit: "cm",
     privacy_settings: {
-      profile_visibility: true,
-      metrics_visibility: true,
       age_visibility: true,
       weight_visibility: true,
       height_visibility: true,
@@ -129,8 +121,6 @@ export const dummyMembers: DBMember[] = [
     height_value: 162,
     height_unit: "cm",
     privacy_settings: {
-      profile_visibility: true,
-      metrics_visibility: true,
       age_visibility: true,
       weight_visibility: true,
       height_visibility: true,
@@ -233,27 +223,6 @@ export const dummyChats: DBChat[] = [
   },
 ];
 
-// Initialize storage with dummy data
-export const initializeStorage = () => {
-  const storage = localStorage.getItem("connections");
-  if (!storage) {
-    localStorage.setItem("connections", JSON.stringify(initialConnections));
-  }
-
-  const members = localStorage.getItem("members");
-  if (!members) {
-    localStorage.setItem(
-      "members",
-      JSON.stringify(dummyMembers.map(convertDBMemberToMember))
-    );
-  }
-
-  const chats = localStorage.getItem("chats");
-  if (!chats) {
-    localStorage.setItem("chats", JSON.stringify(dummyChats));
-  }
-};
-
 // Helper function to convert DB member to frontend Member type
 export const convertDBMemberToMember = (dbMember: DBMember): Member => ({
   id: dbMember.id,
@@ -273,8 +242,6 @@ export const convertDBMemberToMember = (dbMember: DBMember): Member => ({
     unit: dbMember.height_unit,
   },
   privacySettings: {
-    profileVisibility: dbMember.privacy_settings.profile_visibility,
-    metricsVisibility: dbMember.privacy_settings.metrics_visibility,
     ageVisibility: dbMember.privacy_settings.age_visibility,
     weightVisibility: dbMember.privacy_settings.weight_visibility,
     heightVisibility: dbMember.privacy_settings.height_visibility,

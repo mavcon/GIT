@@ -18,8 +18,6 @@ export interface Member {
     unit: "cm" | "ft";
   };
   privacySettings: {
-    profileVisibility: boolean;
-    metricsVisibility: boolean;
     ageVisibility: boolean;
     weightVisibility: boolean;
     heightVisibility: boolean;
@@ -42,10 +40,3 @@ export interface Connection {
   isOnline: boolean;
   lastActive: string;
 }
-
-export const validateTrainingArts = (arts: string[]): TrainingArt[] => {
-  const validArts: TrainingArt[] = ["BJJ", "Wrestling", "Submission Grappling"];
-  return arts.filter((art): art is TrainingArt =>
-    validArts.includes(art as TrainingArt)
-  );
-};

@@ -1,75 +1,54 @@
 import { Member, Connection } from "../types/member";
 import { DBChat } from "../db/schema";
-import {
-  dummyMembers,
-  convertDBMemberToMember,
-  initializeStorage,
-} from "../db/dummy-data";
+import { dummyMembers, convertDBMemberToMember } from "../db/dummy-data";
 import storageService from "./storage";
 
-// Simulate API delay
+// Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-}
-
 class ApiService {
-  constructor() {
-    // Initialize storage with dummy data
-    initializeStorage();
-  }
-
   // Members
   async getMembers(): Promise<Member[]> {
-    await delay(500);
+    await delay(300);
     return storageService.getMembers();
   }
 
-  async getMemberById(id: string): Promise<Member | null> {
+  async getMemberById(memberId: string): Promise<Member | null> {
     await delay(300);
     const members = storageService.getMembers();
-    return members.find((m) => m.id === id) || null;
+    return members.find((m) => m.id === memberId) || null;
   }
 
-  async searchMembers(query: string): Promise<Member[]> {
+  async updateMember(
+    memberId: string,
+    updates: Partial<Member>
+  ): Promise<void> {
     await delay(300);
-    const members = storageService.getMembers();
-    const lowercaseQuery = query.toLowerCase();
-    return members.filter(
-      (m) =>
-        m.username.toLowerCase().includes(lowercaseQuery) ||
-        m.bio?.toLowerCase().includes(lowercaseQuery)
-    );
+    storageService.updateMember(memberId, updates);
   }
 
   // Connections
-  async getConnections(userId: string): Promise<{
+  async getConnections(memberId: string): Promise<{
     followers: Connection[];
     following: Connection[];
-    blocked: Connection[];
   }> {
     await delay(300);
     const connections = storageService.getConnections();
 
     const followers = connections.filter(
       (c: Connection) =>
-        c.targetUserId === userId && c.connectionType === "following"
+        c.targetUserId === memberId && c.connectionType === "following"
     );
 
     const following = connections.filter(
-      (c: Connection) => c.userId === userId && c.connectionType === "following"
+      (c: Connection) =>
+        c.userId === memberId && c.connectionType === "following"
     );
 
-    const blocked = connections.filter(
-      (c: Connection) => c.userId === userId && c.connectionType === "blocked"
-    );
-
-    return { followers, following, blocked };
+    return {
+      followers,
+      following,
+    };
   }
 
   async addConnection(connection: Connection): Promise<void> {
@@ -87,29 +66,24 @@ class ApiService {
   }
 
   // Chats
-  async getChatHistory(
-    userId: string,
-    otherId: string
-  ): Promise<ChatMessage[]> {
+  async getChats(userId: string, targetUserId: string): Promise<ChatMessage[]> {
     await delay(300);
     const chats = storageService.getChats();
     return chats
       .filter(
         (chat: DBChat) =>
-          (chat.sender_id === userId && chat.receiver_id === otherId) ||
-          (chat.sender_id === otherId && chat.receiver_id === userId)
+          (chat.sender_id === userId && chat.receiver_id === targetUserId) ||
+          (chat.sender_id === targetUserId && chat.receiver_id === userId)
       )
       .map((chat: DBChat) => ({
         id: chat.id,
         senderId: chat.sender_id,
+        receiverId: chat.receiver_id,
         message: chat.message,
-        timestamp: chat.created_at,
         isRead: chat.is_read,
-      }))
-      .sort(
-        (a: ChatMessage, b: ChatMessage) =>
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
+        createdAt: chat.created_at,
+        updatedAt: chat.updated_at,
+      }));
   }
 
   async sendMessage(
@@ -119,7 +93,7 @@ class ApiService {
   ): Promise<void> {
     await delay(300);
     const newChat: DBChat = {
-      id: `${Date.now()}`,
+      id: Math.random().toString(36).substring(7),
       sender_id: senderId,
       receiver_id: receiverId,
       message,
@@ -140,7 +114,15 @@ class ApiService {
   }
 }
 
-// Create a singleton instance
-const apiService = new ApiService();
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
+const apiService = new ApiService();
 export default apiService;

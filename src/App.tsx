@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import MemberProfile from "./components/members/MemberProfile";
 import MembersPage from "./pages/Members";
+import Settings from "./pages/Settings";
 import MemberNav from "./components/navigation/MemberNav";
 import { ThemeProvider, ThemeToggle } from "./context/ThemeContext";
 import { ConnectionsProvider } from "./context/ConnectionsContext";
@@ -118,7 +119,7 @@ const RoleSelector = ({
 
 const AppContent: React.FC = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
-  const currentUserId = "1"; // In a real app, this would come from authentication
+  const currentUserId = "1"; // Using ID "1" to match dummy data
 
   // Reset storage and reinitialize on first load
   useEffect(() => {
@@ -170,6 +171,10 @@ const AppContent: React.FC = () => {
               <Route
                 path="/members/*"
                 element={<MembersPage currentUserId={currentUserId} />}
+              />
+              <Route
+                path="/settings"
+                element={<Settings currentUserId={currentUserId} />}
               />
             </>
           )}

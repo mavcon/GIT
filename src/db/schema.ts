@@ -13,8 +13,6 @@ export interface DBMember {
   height_value: number;
   height_unit: "cm" | "ft";
   privacy_settings: {
-    profile_visibility: boolean;
-    metrics_visibility: boolean;
     age_visibility: boolean;
     weight_visibility: boolean;
     height_visibility: boolean;

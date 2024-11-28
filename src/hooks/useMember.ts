@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Member, Connection, validateTrainingArts } from "../types/member";
+import { Member, Connection } from "../types/member";
 import { useConnectionsContext } from "../context/ConnectionsContext";
 import storageService, { STORAGE_EVENTS } from "../services/storage";
 import { dummyMembers } from "../db/dummy-data";
+import { validateTrainingArts } from "../services/validation";
 
 export const useMember = (currentUserId: string) => {
   const connections = useConnectionsContext();
@@ -26,8 +27,6 @@ export const useMember = (currentUserId: string) => {
         unit: dbMember.height_unit,
       },
       privacySettings: {
-        profileVisibility: dbMember.privacy_settings.profile_visibility,
-        metricsVisibility: dbMember.privacy_settings.metrics_visibility,
         ageVisibility: dbMember.privacy_settings.age_visibility,
         weightVisibility: dbMember.privacy_settings.weight_visibility,
         heightVisibility: dbMember.privacy_settings.height_visibility,

@@ -1,4 +1,4 @@
-import { Connection, Member } from "../types/member";
+import { Member, Connection } from "../types/member";
 import { DBChat } from "../db/schema";
 import {
   dummyMembers,
@@ -6,100 +6,105 @@ import {
   dummyChats,
   convertDBMemberToMember,
 } from "../db/dummy-data";
-import {
-  ConnectionPolicies,
-  MemberPolicies,
-  ChatPolicies,
-  ValidationError,
-} from "./validation";
+import { validateMember } from "./validation";
 
 // Storage keys
 const KEYS = {
-  CONNECTIONS: "connections",
   MEMBERS: "members",
+  CONNECTIONS: "connections",
   CHATS: "chats",
-  CURRENT_USER: "currentUser",
-  THEME: "theme",
 } as const;
 
-// Event names for storage changes
+// Custom events for storage updates
 export const STORAGE_EVENTS = {
-  CONNECTIONS_UPDATED: "connectionsUpdated",
   MEMBERS_UPDATED: "membersUpdated",
+  CONNECTIONS_UPDATED: "connectionsUpdated",
   CHATS_UPDATED: "chatsUpdated",
-  CURRENT_USER_UPDATED: "currentUserUpdated",
 } as const;
-
-// Custom event dispatcher
-const dispatchStorageEvent = (eventName: string, data: any) => {
-  const event = new CustomEvent(eventName, { detail: data });
-  window.dispatchEvent(event);
-};
 
 class StorageService {
-  constructor() {
-    this.initializeStorage();
+  private dispatchStorageEvent<T>(eventName: string, data: T) {
+    const event = new CustomEvent(eventName, { detail: data });
+    window.dispatchEvent(event);
   }
 
-  // Reset storage and reinitialize with dummy data
-  resetStorage() {
-    localStorage.clear();
-    this.initializeStorage();
+  addStorageListener<T>(
+    eventName: string,
+    callback: (event: CustomEvent<T>) => void
+  ) {
+    const handler = callback as EventListener;
+    window.addEventListener(eventName, handler);
+    return () => window.removeEventListener(eventName, handler);
   }
 
   // Initialize storage with dummy data
-  initializeStorage() {
-    // Initialize connections
-    if (!localStorage.getItem(KEYS.CONNECTIONS)) {
-      localStorage.setItem(
-        KEYS.CONNECTIONS,
-        JSON.stringify(initialConnections)
-      );
+  resetStorage() {
+    localStorage.clear();
+    this.setMembers(dummyMembers.map(convertDBMemberToMember));
+    this.setConnections(initialConnections);
+    this.setChats(dummyChats);
+  }
+
+  // Members
+  getMembers(): Member[] {
+    const membersJson = localStorage.getItem(KEYS.MEMBERS);
+    return membersJson ? JSON.parse(membersJson) : [];
+  }
+
+  setMembers(members: Member[]) {
+    try {
+      // Validate each member
+      members.forEach((member) => {
+        const errors = validateMember(member);
+        if (errors.length > 0) {
+          throw new Error(`Member validation failed: ${errors.join(", ")}`);
+        }
+      });
+
+      localStorage.setItem(KEYS.MEMBERS, JSON.stringify(members));
+      this.dispatchStorageEvent(STORAGE_EVENTS.MEMBERS_UPDATED, members);
+    } catch (error) {
+      console.error("Error setting members:", error);
+      throw error;
+    }
+  }
+
+  updateMember(memberId: string, updates: Partial<Member>) {
+    const members = this.getMembers();
+    const memberIndex = members.findIndex((m) => m.id === memberId);
+
+    if (memberIndex === -1) {
+      throw new Error(`Member with ID ${memberId} not found`);
     }
 
-    // Initialize members
-    if (!localStorage.getItem(KEYS.MEMBERS)) {
-      const initialMembers = dummyMembers.map(convertDBMemberToMember);
-      localStorage.setItem(KEYS.MEMBERS, JSON.stringify(initialMembers));
+    const updatedMember = {
+      ...members[memberIndex],
+      ...updates,
+    };
+
+    const errors = validateMember(updatedMember);
+    if (errors.length > 0) {
+      throw new Error(`Member validation failed: ${errors.join(", ")}`);
     }
 
-    // Initialize chats
-    if (!localStorage.getItem(KEYS.CHATS)) {
-      localStorage.setItem(KEYS.CHATS, JSON.stringify(dummyChats));
-    }
+    members[memberIndex] = updatedMember;
+    this.setMembers(members);
   }
 
   // Connections
   getConnections(): Connection[] {
-    const data = localStorage.getItem(KEYS.CONNECTIONS);
-    return data ? JSON.parse(data) : [];
+    const connectionsJson = localStorage.getItem(KEYS.CONNECTIONS);
+    return connectionsJson ? JSON.parse(connectionsJson) : [];
   }
 
   setConnections(connections: Connection[]) {
     localStorage.setItem(KEYS.CONNECTIONS, JSON.stringify(connections));
-    dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED, connections);
+    this.dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED, connections);
   }
 
   addConnection(connection: Connection) {
-    try {
-      const connections = this.getConnections();
-
-      // Validate connection using policies
-      ConnectionPolicies.validateConnection(
-        connections,
-        connection.userId,
-        connection.targetUserId,
-        connection.connectionType
-      );
-
-      // If validation passes, add the connection
-      this.setConnections([...connections, connection]);
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        console.warn(`Connection validation failed: ${error.message}`);
-      }
-      throw error;
-    }
+    const connections = this.getConnections();
+    this.setConnections([...connections, connection]);
   }
 
   removeConnection(
@@ -119,70 +124,20 @@ class StorageService {
     this.setConnections(filtered);
   }
 
-  // Members
-  getMembers(): Member[] {
-    const data = localStorage.getItem(KEYS.MEMBERS);
-    if (!data) {
-      const initialMembers = dummyMembers.map(convertDBMemberToMember);
-      this.setMembers(initialMembers);
-      return initialMembers;
-    }
-    return JSON.parse(data);
-  }
-
-  setMembers(members: Member[]) {
-    try {
-      // Validate each member
-      members.forEach((member) => {
-        MemberPolicies.validateMember(member);
-        MemberPolicies.validatePrivacySettings(member);
-        MemberPolicies.validateTrainingArts(member);
-      });
-
-      localStorage.setItem(KEYS.MEMBERS, JSON.stringify(members));
-      dispatchStorageEvent(STORAGE_EVENTS.MEMBERS_UPDATED, members);
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        console.warn(`Member validation failed: ${error.message}`);
-      }
-      throw error;
-    }
-  }
-
-  updateMember(memberId: string, updates: Partial<Member>) {
-    const members = this.getMembers();
-    const updatedMembers = members.map((member) =>
-      member.id === memberId ? { ...member, ...updates } : member
-    );
-    this.setMembers(updatedMembers);
-  }
-
   // Chats
   getChats(): DBChat[] {
-    const data = localStorage.getItem(KEYS.CHATS);
-    return data ? JSON.parse(data) : [];
+    const chatsJson = localStorage.getItem(KEYS.CHATS);
+    return chatsJson ? JSON.parse(chatsJson) : [];
   }
 
   setChats(chats: DBChat[]) {
     localStorage.setItem(KEYS.CHATS, JSON.stringify(chats));
-    dispatchStorageEvent(STORAGE_EVENTS.CHATS_UPDATED, chats);
+    this.dispatchStorageEvent(STORAGE_EVENTS.CHATS_UPDATED, chats);
   }
 
   addChat(chat: DBChat) {
-    try {
-      const connections = this.getConnections();
-
-      // Validate chat using policies
-      ChatPolicies.canChat(connections, chat.sender_id, chat.receiver_id);
-
-      const chats = this.getChats();
-      this.setChats([...chats, chat]);
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        console.warn(`Chat validation failed: ${error.message}`);
-      }
-      throw error;
-    }
+    const chats = this.getChats();
+    this.setChats([...chats, chat]);
   }
 
   updateChat(chatId: string, updates: Partial<DBChat>) {
@@ -192,42 +147,7 @@ class StorageService {
     );
     this.setChats(updatedChats);
   }
-
-  // Current User
-  getCurrentUser(): string | null {
-    return localStorage.getItem(KEYS.CURRENT_USER);
-  }
-
-  setCurrentUser(userId: string | null) {
-    if (userId) {
-      localStorage.setItem(KEYS.CURRENT_USER, userId);
-    } else {
-      localStorage.removeItem(KEYS.CURRENT_USER);
-    }
-    dispatchStorageEvent(STORAGE_EVENTS.CURRENT_USER_UPDATED, userId);
-  }
-
-  // Storage event listeners
-  addStorageListener(
-    eventName: string,
-    callback: (event: CustomEvent) => void
-  ) {
-    window.addEventListener(eventName, callback as EventListener);
-    return () =>
-      window.removeEventListener(eventName, callback as EventListener);
-  }
-
-  // Clear all data
-  clear() {
-    localStorage.clear();
-    dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED, []);
-    dispatchStorageEvent(STORAGE_EVENTS.MEMBERS_UPDATED, []);
-    dispatchStorageEvent(STORAGE_EVENTS.CHATS_UPDATED, []);
-    dispatchStorageEvent(STORAGE_EVENTS.CURRENT_USER_UPDATED, null);
-  }
 }
 
-// Create a singleton instance
 const storageService = new StorageService();
-
 export default storageService;

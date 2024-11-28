@@ -13,7 +13,9 @@ const MemberNav: React.FC = () => {
       <Link
         to="/member"
         className={`tab ${
-          isActive("/member") && !isActive("/members") ? "tab-active" : ""
+          isActive("/member") && !isActive("/members") && !isActive("/settings")
+            ? "tab-active"
+            : ""
         }`}
       >
         Dashboard
@@ -23,6 +25,12 @@ const MemberNav: React.FC = () => {
         className={`tab ${isActive("/members") ? "tab-active" : ""}`}
       >
         Members
+      </Link>
+      <Link
+        to="/settings"
+        className={`tab ${isActive("/settings") ? "tab-active" : ""}`}
+      >
+        Settings
       </Link>
     </div>
   );
