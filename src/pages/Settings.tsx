@@ -327,8 +327,8 @@ const Settings: React.FC<SettingsProps> = ({ currentUserId }) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className={`text-3xl font-bold mb-8 ${textClass}`}>Settings</h1>
+    <div className="container mx-auto px-4 py-4 max-w-2xl">
+      <h1 className={`text-xl font-bold mb-4 ${textClass}`}>Settings</h1>
       <div className="flex flex-col gap-6">
         <ThemeSelector />
         <PrivacySettings member={member} onUpdate={updateMember} />

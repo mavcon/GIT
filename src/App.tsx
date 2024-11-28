@@ -5,6 +5,7 @@ import { ConnectionsProvider } from "./context/ConnectionsContext";
 import { useMember } from "./hooks/useMember";
 import storageService from "./services/storage";
 import RoleBasedRoutes from "./components/routing/RoleBasedRoutes";
+import { Link } from "react-router-dom";
 
 // Role selection component
 const RoleSelector = ({
@@ -68,7 +69,7 @@ const AppContent: React.FC = () => {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Bell Icon with Notification Count */}
           <button className="btn btn-ghost h-12 w-12 flex items-center justify-center relative">
             <div className="relative flex items-center justify-center">
@@ -76,18 +77,18 @@ const AppContent: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-8 w-8"
                 viewBox="0 0 24 24"
-                fill={notificationCount > 0 ? "currentColor" : "none"}
+                fill="none"
                 stroke="currentColor"
-                strokeWidth={notificationCount > 0 ? "0" : "2"}
+                strokeWidth={1.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
                 />
               </svg>
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-error text-error-content w-5 h-5 flex items-center justify-center text-xs font-bold rounded-full">
+                <span className="absolute -top-1 -right-1 bg-error text-error-content w-4 h-4 flex items-center justify-center text-xs font-bold rounded-full">
                   {notificationCount}
                 </span>
               )}
@@ -114,13 +115,16 @@ const AppContent: React.FC = () => {
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <a>Profile</a>
+                <Link to="/member">Profile</Link>
               </li>
               <li>
-                <a>Settings</a>
+                <Link to="/members">Members</Link>
               </li>
               <li>
-                <a onClick={() => setUserRole(null)}>Switch Role</a>
+                <Link to="/settings">Settings</Link>
+              </li>
+              <li>
+                <button onClick={() => setUserRole(null)}>Switch Role</button>
               </li>
             </ul>
           </div>
