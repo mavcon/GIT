@@ -15,8 +15,10 @@ const ThemeSelector: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-base-200 rounded-lg">
-      <h3 className={`text-xl font-bold ${textClass}`}>Theme Preferences</h3>
+    <div className="bg-base-200 rounded-lg">
+      <h3 className={`text-xl font-bold ${textClass} mb-4`}>
+        Theme Preferences
+      </h3>
       <div className="flex gap-4">
         {(["light", "dark", "system"] as const).map((themeOption) => (
           <button
@@ -81,7 +83,7 @@ const ThemeSelector: React.FC = () => {
           </button>
         ))}
       </div>
-      <p className={`text-base font-medium ${textClass}`}>
+      <p className={`text-base font-medium ${textClass} mt-4`}>
         Currently using:{" "}
         <span className="font-bold">
           {theme === "system" ? `System (${currentTheme})` : theme}
@@ -159,8 +161,8 @@ const PrivacySettings: React.FC<{
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-base-200 rounded-lg">
-      <div className="flex items-center justify-between">
+    <div className="bg-base-200 rounded-lg">
+      <div className="flex items-center justify-between mb-4">
         <h3 className={`text-xl font-bold ${textClass}`}>Privacy Settings</h3>
         <motion.div
           className={`flex items-center gap-2 px-3 py-1 rounded-full ${
@@ -234,8 +236,10 @@ const UserInformation: React.FC<{ member: Member }> = ({ member }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-base-200 rounded-lg">
-      <h3 className={`text-xl font-bold ${textClass}`}>Account Information</h3>
+    <div className="bg-base-200 rounded-lg">
+      <h3 className={`text-xl font-bold ${textClass} mb-4`}>
+        Account Information
+      </h3>
       <div className="grid gap-3">
         <div className="flex justify-between items-center">
           <span className={`font-medium ${textClass}`}>Email</span>
@@ -271,12 +275,12 @@ const PasswordChange: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-base-200 rounded-lg">
-      <h3 className={`text-xl font-bold ${textClass}`}>Password</h3>
+    <div className="bg-base-200 rounded-lg">
+      <h3 className={`text-xl font-bold ${textClass} mb-4`}>Password</h3>
       <p className={`font-medium ${textClass}`}>
         Password management coming soon...
       </p>
-      <button className="btn btn-primary font-bold" disabled>
+      <button className="btn btn-primary font-bold mt-4">
         Change Password
       </button>
     </div>
@@ -290,8 +294,8 @@ const LegalDocuments: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-base-200 rounded-lg">
-      <h3 className={`text-xl font-bold ${textClass}`}>Legal Documents</h3>
+    <div className="bg-base-200 rounded-lg">
+      <h3 className={`text-xl font-bold ${textClass} mb-4`}>Legal Documents</h3>
       <div className="flex flex-col gap-2">
         <a
           href="/terms"
@@ -329,12 +333,22 @@ const Settings: React.FC<SettingsProps> = ({ currentUserId }) => {
   return (
     <div className="container mx-auto px-2 py-2 max-w-2xl">
       <h1 className={`text-xl font-bold mb-2 ${textClass}`}>Settings</h1>
-      <div className="flex flex-col gap-6">
-        <ThemeSelector />
-        <PrivacySettings member={member} onUpdate={updateMember} />
-        <PasswordChange />
-        <UserInformation member={member} />
-        <LegalDocuments />
+      <div className="flex flex-col gap-4">
+        <div className="p-4">
+          <ThemeSelector />
+        </div>
+        <div className="p-4">
+          <PrivacySettings member={member} onUpdate={updateMember} />
+        </div>
+        <div className="p-4">
+          <PasswordChange />
+        </div>
+        <div className="p-4">
+          <UserInformation member={member} />
+        </div>
+        <div className="p-4">
+          <LegalDocuments />
+        </div>
       </div>
     </div>
   );

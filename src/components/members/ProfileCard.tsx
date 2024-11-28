@@ -26,8 +26,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isEditing = false,
 }) => {
   return (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
+    <div className="bg-base-100 rounded-lg">
+      <div className="p-4">
         <div className="flex justify-between items-start">
           <div className="flex-grow">
             <ProfileHeader

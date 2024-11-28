@@ -76,8 +76,8 @@ const ConnectionsCard: React.FC<ConnectionsCardProps> = ({
   };
 
   return (
-    <div className="card bg-base-100 shadow-xl mt-4">
-      <div className="card-body">
+    <div className="bg-base-100 rounded-lg">
+      <div className="p-4">
         {/* Tabs */}
         <div className="tabs tabs-boxed">
           <button
@@ -101,7 +101,7 @@ const ConnectionsCard: React.FC<ConnectionsCardProps> = ({
         {/* Connection List */}
         <div className="mt-4">
           {connections.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {connections.map((connection) => {
                 const memberId =
                   activeTab === "followers"
@@ -255,7 +255,7 @@ const ConnectionsCard: React.FC<ConnectionsCardProps> = ({
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-base-content/70">
+            <div className="text-center py-4 text-base-content/70">
               No {activeTab} yet
             </div>
           )}
