@@ -17,6 +17,7 @@ interface EditableFields {
     value: number;
     unit: "kg" | "lbs";
   };
+  trainingArts: TrainingArt[];
 }
 
 const MemberProfile: React.FC<MemberProfileProps> = ({
@@ -29,6 +30,7 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
     username: member.username,
     bio: member.bio,
     weight: { ...member.weight },
+    trainingArts: [...member.trainingArts],
   });
 
   const {
@@ -47,6 +49,13 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
+    // Reset editable fields when entering edit mode
+    setEditableFields({
+      username: member.username,
+      bio: member.bio,
+      weight: { ...member.weight },
+      trainingArts: [...member.trainingArts],
+    });
   };
 
   const handleSave = () => {
@@ -55,6 +64,7 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
       username: editableFields.username,
       bio: editableFields.bio,
       weight: editableFields.weight,
+      trainingArts: editableFields.trainingArts,
     });
     setIsEditing(false);
   };
@@ -64,28 +74,36 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
       username: member.username,
       bio: member.bio,
       weight: { ...member.weight },
+      trainingArts: [...member.trainingArts],
     });
     setIsEditing(false);
   };
 
   const handleFieldChange = (
     field: keyof EditableFields,
-    value: string | number
+    value: string | number | TrainingArt[]
   ) => {
-    if (field === "weight") {
-      setEditableFields((prev) => ({
-        ...prev,
-        weight: {
-          ...prev.weight,
-          value: Number(value),
-        },
-      }));
-    } else {
-      setEditableFields((prev) => ({
+    setEditableFields((prev) => {
+      if (field === "weight" && typeof value === "number") {
+        return {
+          ...prev,
+          weight: {
+            ...prev.weight,
+            value: value,
+          },
+        };
+      }
+      if (field === "trainingArts" && Array.isArray(value)) {
+        return {
+          ...prev,
+          trainingArts: value,
+        };
+      }
+      return {
         ...prev,
         [field]: value,
-      }));
-    }
+      };
+    });
   };
 
   const handlePhotoUpload = (file: File) => {
@@ -95,13 +113,6 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
     updateMember(member.id, {
       ...member,
       profilePhoto: url,
-    });
-  };
-
-  const handleTrainingArtsChange = (arts: TrainingArt[]) => {
-    updateMember(member.id, {
-      ...member,
-      trainingArts: arts,
     });
   };
 
@@ -195,13 +206,15 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
     <div className="space-y-6">
       {/* Profile Card */}
       <ProfileCard
-        member={isEditing ? { ...member, ...editableFields } : member}
+        member={
+          isEditing
+            ? { ...member, trainingArts: editableFields.trainingArts }
+            : member
+        }
         isOwnProfile={isOwnProfile}
         onEdit={isOwnProfile ? handleEdit : undefined}
         onPhotoUpload={isOwnProfile ? handlePhotoUpload : undefined}
-        onTrainingArtsChange={
-          isOwnProfile ? handleTrainingArtsChange : undefined
-        }
+        onTrainingArtsChange={(arts) => handleFieldChange("trainingArts", arts)}
         actions={renderMemberActions()}
         isEditing={isEditing}
       />
@@ -245,7 +258,9 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
                   type="number"
                   className="input input-bordered w-full"
                   value={editableFields.weight.value}
-                  onChange={(e) => handleFieldChange("weight", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("weight", Number(e.target.value))
+                  }
                 />
               </div>
               <div className="flex justify-end gap-2">

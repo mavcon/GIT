@@ -60,10 +60,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }
   };
 
-  const handleTrainingArtToggle = (e: React.MouseEvent, art: TrainingArt) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const handleTrainingArtToggle = (art: TrainingArt) => {
     if (!onTrainingArtsChange || !isOwnProfile || !isEditing) return;
 
     const currentArts = new Set(member.trainingArts);
@@ -78,6 +75,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const handlePublicPreview = () => {
     window.open(`/members/${member.id}?preview=true`, "_blank");
   };
+
+  const trainingArts: TrainingArt[] = [
+    "BJJ",
+    "Wrestling",
+    "Submission Grappling",
+  ];
 
   return (
     <div className="card bg-base-100 shadow-xl">
@@ -225,36 +228,35 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Training Focus</h3>
           <div className="flex flex-wrap gap-2">
-            {["BJJ", "Wrestling", "Submission Grappling"].map((art) => {
-              const isSelected = member.trainingArts.includes(
-                art as TrainingArt
-              );
+            {trainingArts.map((art) => {
+              const isSelected = member.trainingArts.includes(art);
               if (!isSelected && !isEditing) return null;
 
               return (
-                <button
+                <div
                   key={art}
-                  className={`badge badge-lg ${
-                    isSelected ? "badge-primary" : "badge-ghost"
-                  } ${
-                    isOwnProfile && isEditing
-                      ? "cursor-pointer hover:badge-primary"
-                      : "cursor-default"
-                  }`}
-                  onClick={(e) =>
-                    handleTrainingArtToggle(e, art as TrainingArt)
-                  }
-                  disabled={!isOwnProfile || !isEditing}
+                  onClick={() => isEditing && handleTrainingArtToggle(art)}
+                  className={`
+                    badge badge-lg select-none
+                    ${isSelected ? "badge-primary" : "badge-ghost"}
+                    ${isEditing ? "cursor-pointer hover:opacity-75" : ""}
+                  `}
                 >
                   {art === "BJJ"
                     ? "BJJ (gi)"
                     : art === "Submission Grappling"
                     ? "Nogi"
                     : art}
-                </button>
+                </div>
               );
             })}
           </div>
+          {isEditing && (
+            <p className="text-sm text-base-content/70 mt-2">
+              Click to select/deselect training focus. Changes will be saved
+              when you click Save.
+            </p>
+          )}
         </div>
       </div>
 
