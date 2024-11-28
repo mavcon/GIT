@@ -114,7 +114,7 @@ const ThemeIcons = {
 };
 
 export const ThemeToggle: React.FC = () => {
-  const { theme, setTheme, currentTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <button
@@ -125,7 +125,7 @@ export const ThemeToggle: React.FC = () => {
         setTheme(nextTheme);
       }}
       className="btn btn-ghost btn-circle"
-      title={`Current: ${theme} (${currentTheme})`}
+      title={`Current: ${theme}`}
     >
       {ThemeIcons[theme]}
     </button>

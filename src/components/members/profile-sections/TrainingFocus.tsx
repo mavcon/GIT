@@ -14,9 +14,8 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
   trainingStartDate,
   onTrainingArtsChange,
 }) => {
-  const { theme, currentTheme } = useTheme();
-  const isDark =
-    theme === "dark" || (theme === "system" && currentTheme === "dark");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const getArtIcon = (art: TrainingArt) => {
     switch (art) {
@@ -34,6 +33,7 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
   const getArtStyle = (art: TrainingArt) => {
     switch (art) {
       case "BJJ":
+        return "bg-primary/10 text-primary border-primary/20";
         return "bg-primary/10 text-primary border-primary/20";
       case "Submission Grappling":
         return "bg-secondary/10 text-secondary border-secondary/20";
