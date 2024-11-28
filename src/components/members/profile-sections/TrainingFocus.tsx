@@ -1,6 +1,7 @@
 import React from "react";
 import { TrainingArt } from "../../../types/member";
 import { formatTrainingDuration } from "../../../utils/dateUtils";
+import { useTheme } from "../../../context/ThemeContext";
 
 interface TrainingFocusProps {
   trainingArts: TrainingArt[];
@@ -13,6 +14,10 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
   trainingStartDate,
   onTrainingArtsChange,
 }) => {
+  const { theme, currentTheme } = useTheme();
+  const isDark =
+    theme === "dark" || (theme === "system" && currentTheme === "dark");
+
   const getArtIcon = (art: TrainingArt) => {
     switch (art) {
       case "BJJ":
@@ -73,7 +78,11 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
               className={`flex flex-col items-center p-4 rounded-lg border ${getArtStyle(
                 art
               )} ${
-                isActive ? "ring-1 ring-offset-1 ring-base-content/20" : ""
+                isActive
+                  ? `ring-1 ring-offset-1 ${
+                      isDark ? "ring-base-content/20" : "ring-base-content/50"
+                    }`
+                  : ""
               } ${
                 onTrainingArtsChange
                   ? "cursor-pointer hover:opacity-80"
