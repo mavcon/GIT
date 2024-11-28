@@ -1,49 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import MemberProfile from "./components/members/MemberProfile";
+import MembersPage from "./pages/Members";
+import MemberNav from "./components/navigation/MemberNav";
+import { ThemeProvider, ThemeToggle } from "./context/ThemeContext";
+import { ConnectionsProvider } from "./context/ConnectionsContext";
+import { useMember } from "./hooks/useMember";
+import storageService from "./services/storage";
 
 // Role-based components
+const SuperAdminDashboard = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="p-6 bg-base-200"
+  >
+    <h1 className="text-2xl font-bold">Super Admin Dashboard</h1>
+    <p>Complete system control and management</p>
+  </motion.div>
+);
+
 const AdminDashboard = () => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="p-6 bg-gray-100"
+    className="p-6 bg-base-200"
   >
     <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-    <p>Full system access and management</p>
+    <p>System administration and oversight</p>
   </motion.div>
 );
 
-const ManagerDashboard = () => (
+const PartnerDashboard = () => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="p-6 bg-gray-100"
+    className="p-6 bg-base-200"
   >
-    <h1 className="text-2xl font-bold">Manager Dashboard</h1>
-    <p>Team and resource management</p>
+    <h1 className="text-2xl font-bold">Partner Dashboard</h1>
+    <p>Partnership management and collaboration tools</p>
   </motion.div>
 );
 
-const MemberDashboard = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="p-6 bg-gray-100"
-  >
-    <h1 className="text-2xl font-bold">Member Dashboard</h1>
-    <p>Standard member access</p>
-  </motion.div>
-);
+interface MemberDashboardProps {
+  currentUserId: string;
+}
 
-const GuestDashboard = () => (
+const MemberDashboard: React.FC<MemberDashboardProps> = ({ currentUserId }) => {
+  const { getMemberById } = useMember(currentUserId);
+  const member = getMemberById(currentUserId);
+
+  if (!member) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-6 bg-base-200"
+    >
+      <h1 className="text-2xl font-bold mb-6">Member Dashboard</h1>
+      <div className="mt-6">
+        <MemberProfile
+          currentUserId={currentUserId}
+          member={member}
+          isOwnProfile={true}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+const UserDashboard = () => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="p-6 bg-gray-100"
+    className="p-6 bg-base-200"
   >
-    <h1 className="text-2xl font-bold">Guest Dashboard</h1>
-    <p>Limited preview access</p>
+    <h1 className="text-2xl font-bold">User Dashboard</h1>
+    <p>Basic user features and access</p>
   </motion.div>
 );
 
@@ -56,79 +91,105 @@ const RoleSelector = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="flex flex-col items-center justify-center min-h-screen bg-gray-50"
+    className="flex flex-col items-center justify-center min-h-screen bg-base-200"
   >
-    <div className="p-8 bg-white rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">Select Your Role</h1>
-      <div className="grid grid-cols-2 gap-4">
-        {["admin", "manager", "member", "guest"].map((role) => (
-          <motion.button
-            key={role}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onRoleSelect(role)}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg capitalize hover:bg-blue-600 transition-colors"
-          >
-            {role}
-          </motion.button>
-        ))}
+    <div className="card bg-base-100 shadow-xl">
+      <div className="card-body">
+        <h1 className="card-title text-2xl mb-6 text-center">
+          Select Your Role
+        </h1>
+        <div className="grid grid-cols-2 gap-4">
+          {["superadmin", "admin", "partner", "member", "user"].map((role) => (
+            <motion.button
+              key={role}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onRoleSelect(role)}
+              className="btn btn-primary"
+            >
+              {role === "superadmin" ? "Super Admin" : role}
+            </motion.button>
+          ))}
+        </div>
       </div>
     </div>
   </motion.div>
 );
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const currentUserId = "1"; // In a real app, this would come from authentication
 
-  const handleRoleSelect = (role: string) => {
-    setUserRole(role);
-  };
+  // Reset storage and reinitialize on first load
+  useEffect(() => {
+    storageService.resetStorage();
+  }, []);
 
   if (!userRole) {
-    return <RoleSelector onRoleSelect={handleRoleSelect} />;
+    return <RoleSelector onRoleSelect={setUserRole} />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-xl font-semibold">Role-Based App</span>
-            </div>
-            <div className="flex items-center">
-              <span className="capitalize px-4 py-2 rounded-md bg-gray-100">
-                {userRole} Role
-              </span>
-              <button
-                onClick={() => setUserRole(null)}
-                className="ml-4 px-4 py-2 text-sm text-red-600 hover:text-red-800"
-              >
-                Switch Role
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-base-200">
+      <div className="navbar bg-base-100 shadow-lg">
+        <div className="navbar-start">
+          <span className="text-xl font-semibold">Role-Based App</span>
         </div>
-      </nav>
+        <div className="navbar-end">
+          <span className="badge badge-lg mr-2">
+            {userRole === "superadmin" ? "Super Admin" : userRole} Role
+          </span>
+          <ThemeToggle />
+          <button
+            onClick={() => setUserRole(null)}
+            className="btn btn-ghost btn-sm ml-2"
+          >
+            Switch Role
+          </button>
+        </div>
+      </div>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="container mx-auto py-6 px-4">
+        {userRole === "member" && <MemberNav />}
         <Routes>
+          {userRole === "superadmin" && (
+            <Route path="/superadmin" element={<SuperAdminDashboard />} />
+          )}
           {userRole === "admin" && (
             <Route path="/admin" element={<AdminDashboard />} />
           )}
-          {userRole === "manager" && (
-            <Route path="/manager" element={<ManagerDashboard />} />
+          {userRole === "partner" && (
+            <Route path="/partner" element={<PartnerDashboard />} />
           )}
           {userRole === "member" && (
-            <Route path="/member" element={<MemberDashboard />} />
+            <>
+              <Route
+                path="/member"
+                element={<MemberDashboard currentUserId={currentUserId} />}
+              />
+              <Route
+                path="/members/*"
+                element={<MembersPage currentUserId={currentUserId} />}
+              />
+            </>
           )}
-          {userRole === "guest" && (
-            <Route path="/guest" element={<GuestDashboard />} />
+          {userRole === "user" && (
+            <Route path="/user" element={<UserDashboard />} />
           )}
           <Route path="*" element={<Navigate to={`/${userRole}`} replace />} />
         </Routes>
       </main>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <ConnectionsProvider>
+        <AppContent />
+      </ConnectionsProvider>
+    </ThemeProvider>
   );
 };
 
