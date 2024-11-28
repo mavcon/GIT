@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import MemberNav from "../navigation/MemberNav";
 import MemberProfilePage from "../members/MemberProfilePage";
 import MembersPage from "../../pages/Members";
 import Settings from "../../pages/Settings";
@@ -94,7 +93,6 @@ const RoleBasedRoutes: React.FC<RoleBasedRoutesProps> = ({
 
   return (
     <main className="container mx-auto py-6 px-4">
-      {userRole === "member" && <MemberNav />}
       <Routes>
         {renderRoutes()}
         <Route path="*" element={<Navigate to={`/${userRole}`} replace />} />

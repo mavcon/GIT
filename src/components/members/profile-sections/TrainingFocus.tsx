@@ -23,9 +23,9 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
       case "BJJ":
         return "🥋"; // Gi icon
       case "Submission Grappling":
-        return "🤼"; // Wrestling icon for nogi
+        return "🤼"; // Wrestling icon for grappling
       case "Wrestling":
-        return "🤼‍♂️"; // Wrestling icon
+        return "🎭"; // Luchador mask icon
       default:
         return "🥋";
     }
@@ -95,7 +95,7 @@ const TrainingFocus: React.FC<TrainingFocusProps> = ({
                 {art === "BJJ"
                   ? "BJJ (gi)"
                   : art === "Submission Grappling"
-                  ? "Nogi"
+                  ? "Grappling"
                   : art}
               </span>
               <div className="text-center">

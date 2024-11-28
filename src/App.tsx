@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ConnectionsProvider } from "./context/ConnectionsContext";
 import { useMember } from "./hooks/useMember";
 import storageService from "./services/storage";
 import RoleBasedRoutes from "./components/routing/RoleBasedRoutes";
 import ProfileImage from "./components/common/ProfileImage";
+import MemberNav from "./components/navigation/MemberNav";
 import { Link } from "react-router-dom";
 
 // Role selection component
@@ -49,6 +50,8 @@ const AppContent: React.FC = () => {
   const notificationCount = 3; // Example notification count
   const { getMemberById } = useMember(currentUserId);
   const currentMember = getMemberById(currentUserId);
+  const { theme, currentTheme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && currentTheme === "dark");
 
   // Reset storage and reinitialize on first load
   useEffect(() => {
@@ -61,7 +64,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <div className="navbar bg-base-100 shadow-lg">
+      <div className={`navbar shadow-lg ${isDark ? 'bg-neutral text-neutral-content' : 'bg-base-300'}`}>
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex w-full justify-between items-center">
             <div className="flex items-center h-12">
@@ -70,6 +73,12 @@ const AppContent: React.FC = () => {
                 DOJOLIBRE
               </span>
             </div>
+            
+            {/* Center Navigation */}
+            <div className="flex-1 flex justify-center">
+              <MemberNav />
+            </div>
+
             <div className="flex items-center gap-2">
               {/* Bell Icon with Notification Count */}
               <button className="btn btn-ghost h-12 w-12 flex items-center justify-center relative">
