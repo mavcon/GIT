@@ -15,7 +15,7 @@ const ThemeSelector: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="bg-base-200 rounded-lg">
+    <div className="bg-base-100 rounded-lg p-4">
       <h3 className={`text-xl font-bold ${textClass} mb-4`}>
         Theme Preferences
       </h3>
@@ -28,7 +28,7 @@ const ThemeSelector: React.FC = () => {
               ${
                 theme === themeOption
                   ? "bg-primary text-primary-content"
-                  : `bg-base-100 hover:bg-base-300 ${textClass}`
+                  : `bg-base-200 hover:bg-base-300 ${textClass}`
               }`}
           >
             {themeOption === "light" && (
@@ -109,7 +109,7 @@ const PrivacyToggle: React.FC<{
         className={`p-2 rounded-full transition-colors ${
           checked
             ? "bg-primary text-primary-content"
-            : `bg-base-300 ${textClass}`
+            : `bg-base-200 ${textClass}`
         }`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -161,14 +161,14 @@ const PrivacySettings: React.FC<{
   );
 
   return (
-    <div className="bg-base-200 rounded-lg">
+    <div className="bg-base-100 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className={`text-xl font-bold ${textClass}`}>Privacy Settings</h3>
         <motion.div
           className={`flex items-center gap-2 px-3 py-1 rounded-full ${
             isPublicProfile
               ? "bg-primary text-primary-content"
-              : `bg-base-300 ${textClass}`
+              : `bg-base-200 ${textClass}`
           }`}
           animate={{ scale: isPublicProfile ? 1 : 0.95 }}
         >
@@ -236,7 +236,7 @@ const UserInformation: React.FC<{ member: Member }> = ({ member }) => {
   };
 
   return (
-    <div className="bg-base-200 rounded-lg">
+    <div className="bg-base-100 rounded-lg p-4">
       <h3 className={`text-xl font-bold ${textClass} mb-4`}>
         Account Information
       </h3>
@@ -275,7 +275,7 @@ const PasswordChange: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="bg-base-200 rounded-lg">
+    <div className="bg-base-100 rounded-lg p-4">
       <h3 className={`text-xl font-bold ${textClass} mb-4`}>Password</h3>
       <p className={`font-medium ${textClass}`}>
         Password management coming soon...
@@ -294,7 +294,7 @@ const LegalDocuments: React.FC = () => {
   const textClass = isDark ? "text-white" : "text-gray-900";
 
   return (
-    <div className="bg-base-200 rounded-lg">
+    <div className="bg-base-100 rounded-lg p-4">
       <h3 className={`text-xl font-bold ${textClass} mb-4`}>Legal Documents</h3>
       <div className="flex flex-col gap-2">
         <a
@@ -333,22 +333,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserId }) => {
   return (
     <div className="container mx-auto px-2 py-2 max-w-2xl">
       <h1 className={`text-xl font-bold mb-2 ${textClass}`}>Settings</h1>
-      <div className="flex flex-col gap-4">
-        <div className="p-4">
-          <ThemeSelector />
-        </div>
-        <div className="p-4">
-          <PrivacySettings member={member} onUpdate={updateMember} />
-        </div>
-        <div className="p-4">
-          <PasswordChange />
-        </div>
-        <div className="p-4">
-          <UserInformation member={member} />
-        </div>
-        <div className="p-4">
-          <LegalDocuments />
-        </div>
+      <div className="flex flex-col gap-2">
+        <ThemeSelector />
+        <PrivacySettings member={member} onUpdate={updateMember} />
+        <PasswordChange />
+        <UserInformation member={member} />
+        <LegalDocuments />
       </div>
     </div>
   );

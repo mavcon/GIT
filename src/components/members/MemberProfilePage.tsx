@@ -16,20 +16,16 @@ const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   if (!member) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="p-6 bg-base-200"
-    >
-      <h1 className="text-2xl font-bold mb-6">Member Profile</h1>
-      <div className="mt-6">
+    <div className="container mx-auto px-2 py-2 max-w-2xl">
+      <h1 className="text-xl font-bold mb-2">Member Profile</h1>
+      <div className="bg-base-100 rounded-lg p-4">
         <MemberProfile
           currentUserId={currentUserId}
           member={member}
           isOwnProfile={true}
         />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
