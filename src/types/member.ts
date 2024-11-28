@@ -1,5 +1,8 @@
 export type TrainingArt = "BJJ" | "Wrestling" | "Submission Grappling";
 
+export type MembershipStatus = "free" | "paid";
+export type AccountStatus = "active" | "suspended" | "banned";
+
 export interface Member {
   id: string;
   username: string;
@@ -23,7 +26,8 @@ export interface Member {
     heightVisibility: boolean;
     connectionsVisibility: boolean;
   };
-  status: "active" | "inactive" | "suspended";
+  membershipStatus: MembershipStatus;
+  accountStatus: AccountStatus;
   isOnline: boolean;
   lastActive: string;
 }

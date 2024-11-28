@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Connection, Member } from "../../types/member";
 import { useMember } from "../../hooks/useMember";
+import ProfileImage from "../common/ProfileImage";
 
 interface ConnectionsCardProps {
   currentUserId: string;
@@ -120,18 +121,14 @@ const ConnectionsCard: React.FC<ConnectionsCardProps> = ({
                     {/* Avatar */}
                     <div
                       onClick={() => handleMemberClick(member.id)}
-                      className="avatar hover:opacity-80 transition-opacity cursor-pointer"
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                      <div className="w-10 h-10 rounded-full relative">
-                        <img
-                          src={member.profilePhoto || "/default-avatar.png"}
-                          alt={member.username}
-                          className="object-cover"
-                        />
-                        {member.isOnline && (
-                          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-100" />
-                        )}
-                      </div>
+                      <ProfileImage
+                        src={member.profilePhoto}
+                        alt={member.username}
+                        isOnline={member.isOnline}
+                        size="sm"
+                      />
                     </div>
 
                     {/* Info */}

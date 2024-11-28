@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Member } from "../../types/member";
 import { useMember } from "../../hooks/useMember";
+import ProfileImage from "../common/ProfileImage";
 
 interface MemberListProps {
   currentUserId: string;
@@ -71,18 +72,14 @@ const MemberList: React.FC<MemberListProps> = ({
                 {/* Avatar */}
                 <Link
                   to={`/members/${member.id}`}
-                  className="avatar hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity"
                 >
-                  <div className="w-12 h-12 rounded-full relative">
-                    <img
-                      src={member.profilePhoto || "/default-avatar.png"}
-                      alt={member.username}
-                      className="object-cover"
-                    />
-                    {member.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100" />
-                    )}
-                  </div>
+                  <ProfileImage
+                    src={member.profilePhoto}
+                    alt={member.username}
+                    isOnline={member.isOnline}
+                    size="sm"
+                  />
                 </Link>
 
                 {/* Info */}

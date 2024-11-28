@@ -18,7 +18,8 @@ export interface DBMember {
     height_visibility: boolean;
     connections_visibility: boolean;
   };
-  status: "active" | "inactive" | "suspended";
+  membership_status: "free" | "paid";
+  account_status: "active" | "suspended" | "banned";
   is_online: boolean;
   last_active: string;
   created_at: string;
