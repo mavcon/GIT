@@ -46,13 +46,15 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
   const connectionState = getConnectionState(member.id);
 
   const handleEdit = () => {
-    setIsEditing(true);
+    setIsEditing(!isEditing);
   };
 
   const handleSave = () => {
     updateMember(member.id, {
       ...member,
-      ...editableFields,
+      username: editableFields.username,
+      bio: editableFields.bio,
+      weight: editableFields.weight,
     });
     setIsEditing(false);
   };
@@ -201,6 +203,7 @@ const MemberProfile: React.FC<MemberProfileProps> = ({
           isOwnProfile ? handleTrainingArtsChange : undefined
         }
         actions={renderMemberActions()}
+        isEditing={isEditing}
       />
 
       {/* Edit Form */}

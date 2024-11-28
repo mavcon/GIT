@@ -9,6 +9,7 @@ interface ProfileCardProps {
   onPhotoUpload?: (file: File) => void;
   onTrainingArtsChange?: (arts: TrainingArt[]) => void;
   actions?: React.ReactNode;
+  isEditing?: boolean;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -18,6 +19,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onPhotoUpload,
   onTrainingArtsChange,
   actions,
+  isEditing = false,
 }) => {
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
@@ -27,6 +29,22 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     const diffTime = Math.abs(now.getTime() - start.getTime());
     const diffYears = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 365));
     return diffYears;
+  };
+
+  const calculateAge = (dateOfBirth: string): number => {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
   };
 
   const handlePhotoClick = () => {
@@ -42,8 +60,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }
   };
 
-  const handleTrainingArtToggle = (art: TrainingArt) => {
-    if (!onTrainingArtsChange || !isOwnProfile) return;
+  const handleTrainingArtToggle = (e: React.MouseEvent, art: TrainingArt) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!onTrainingArtsChange || !isOwnProfile || !isEditing) return;
 
     const currentArts = new Set(member.trainingArts);
     if (currentArts.has(art)) {
@@ -52,6 +73,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       currentArts.add(art);
     }
     onTrainingArtsChange(Array.from(currentArts));
+  };
+
+  const handlePublicPreview = () => {
+    window.open(`/members/${member.id}?preview=true`, "_blank");
   };
 
   return (
@@ -105,12 +130,58 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <div className="flex-grow">
             <h2 className="card-title text-2xl">{member.username}</h2>
             <p className="text-base-content/70">{member.bio}</p>
+            <div className="flex gap-4 mt-2 text-sm text-base-content/70">
+              {member.privacySettings.ageVisibility && (
+                <span>Age: {calculateAge(member.dateOfBirth)}</span>
+              )}
+              {member.privacySettings.heightVisibility && (
+                <span>
+                  Height: {member.height.value}
+                  {member.height.unit}
+                </span>
+              )}
+              {member.privacySettings.weightVisibility && (
+                <span>
+                  Weight: {member.weight.value}
+                  {member.weight.unit}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {isOwnProfile
-              ? onEdit && (
+            {isOwnProfile ? (
+              <>
+                {/* Public Preview Button */}
+                <button
+                  onClick={handlePublicPreview}
+                  className="btn btn-ghost btn-sm btn-circle"
+                  title="Public Preview"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </button>
+                {/* Edit Button */}
+                {onEdit && (
                   <button
                     onClick={onEdit}
                     className="btn btn-ghost btn-sm btn-circle"
@@ -131,8 +202,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                       />
                     </svg>
                   </button>
-                )
-              : actions}
+                )}
+              </>
+            ) : (
+              actions
+            )}
           </div>
         </div>
 
@@ -151,24 +225,35 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Training Focus</h3>
           <div className="flex flex-wrap gap-2">
-            {["BJJ", "Wrestling", "Submission Grappling"].map((art) => (
-              <button
-                key={art}
-                className={`badge badge-lg ${
-                  member.trainingArts.includes(art as TrainingArt)
-                    ? "badge-primary"
-                    : "badge-ghost"
-                } ${isOwnProfile ? "cursor-pointer hover:badge-primary" : ""}`}
-                onClick={() => handleTrainingArtToggle(art as TrainingArt)}
-                disabled={!isOwnProfile}
-              >
-                {art === "BJJ"
-                  ? "BJJ (gi)"
-                  : art === "Submission Grappling"
-                  ? "Nogi"
-                  : art}
-              </button>
-            ))}
+            {["BJJ", "Wrestling", "Submission Grappling"].map((art) => {
+              const isSelected = member.trainingArts.includes(
+                art as TrainingArt
+              );
+              if (!isSelected && !isEditing) return null;
+
+              return (
+                <button
+                  key={art}
+                  className={`badge badge-lg ${
+                    isSelected ? "badge-primary" : "badge-ghost"
+                  } ${
+                    isOwnProfile && isEditing
+                      ? "cursor-pointer hover:badge-primary"
+                      : "cursor-default"
+                  }`}
+                  onClick={(e) =>
+                    handleTrainingArtToggle(e, art as TrainingArt)
+                  }
+                  disabled={!isOwnProfile || !isEditing}
+                >
+                  {art === "BJJ"
+                    ? "BJJ (gi)"
+                    : art === "Submission Grappling"
+                    ? "Nogi"
+                    : art}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
