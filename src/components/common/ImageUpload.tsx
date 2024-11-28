@@ -1,128 +1,91 @@
 import React, { useRef, useState } from "react";
 
-interface ImageUploadProps {
-  currentImage?: string;
-  onImageUpload: (file: File) => void;
-  className?: string;
+export interface ImageUploadProps {
+  onUpload: (file: File) => void;
+  onClose: () => void;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({
-  currentImage,
-  onImageUpload,
-  className = "",
-}) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, onClose }) => {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileChange = (file: File) => {
-    if (file && file.type.startsWith("image/")) {
-      onImageUpload(file);
-    }
-  };
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const file = e.dataTransfer.files[0];
-    handleFileChange(file);
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size should be less than 5MB");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setError(null);
+  };
+
+  const handleUpload = () => {
+    const file = fileInputRef.current?.files?.[0];
     if (file) {
-      handleFileChange(file);
+      onUpload(file);
     }
   };
 
   return (
-    <div
-      className={`relative cursor-pointer group ${className}`}
-      onClick={handleClick}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleInputChange}
-        accept="image/*"
-        className="hidden"
-      />
-      <div
-        className={`w-full h-full rounded-full overflow-hidden ${
-          isDragging ? "ring-4 ring-primary ring-offset-2" : ""
-        }`}
-      >
-        <img
-          src={currentImage || "/default-avatar.png"}
-          alt="Profile"
-          className="w-full h-full object-cover"
-        />
-        <div
-          className={`absolute inset-0 bg-black rounded-full ${
-            isDragging ? "opacity-70" : "opacity-0 group-hover:opacity-50"
-          } transition-opacity flex flex-col items-center justify-center text-white gap-2`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg mb-4">Upload Profile Photo</h3>
+
+        {/* Preview */}
+        {preview && (
+          <div className="mb-4">
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-32 h-32 rounded-full object-cover mx-auto"
             />
-          </svg>
-          <span className="text-xs font-medium">
-            {isDragging ? "Drop image here" : "Click or drag image"}
-          </span>
+          </div>
+        )}
+
+        {/* File Input */}
+        <div className="form-control">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="file-input file-input-bordered w-full"
+          />
+          {error && (
+            <label className="label">
+              <span className="label-text-alt text-error">{error}</span>
+            </label>
+          )}
         </div>
-      </div>
-      <div className="absolute bottom-1 right-1">
-        <div className="badge badge-primary badge-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-3 w-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+
+        {/* Actions */}
+        <div className="modal-action">
+          <button className="btn btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleUpload}
+            disabled={!preview || !!error}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-            />
-          </svg>
+            Upload
+          </button>
         </div>
       </div>
     </div>

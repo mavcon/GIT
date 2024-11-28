@@ -1,5 +1,5 @@
-import React from "react";
-import { Member } from "../../types/member";
+import React, { useState } from "react";
+import { Member, TrainingArt } from "../../types/member";
 import ProfileCard from "./ProfileCard";
 import ConnectionsCard from "./ConnectionsCard";
 import { useMember } from "../../hooks/useMember";
@@ -10,43 +10,261 @@ interface MemberProfileProps {
   isOwnProfile: boolean;
 }
 
+interface EditableFields {
+  username: string;
+  bio: string;
+  weight: {
+    value: number;
+    unit: "kg" | "lbs";
+  };
+}
+
 const MemberProfile: React.FC<MemberProfileProps> = ({
   currentUserId,
   member,
   isOwnProfile,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableFields, setEditableFields] = useState<EditableFields>({
+    username: member.username,
+    bio: member.bio,
+    weight: { ...member.weight },
+  });
+
   const {
-    getVisibleConnections,
     handleFollow,
     handleUnfollow,
     handleBlock,
     handleUnblock,
     handleChat,
+    getVisibleConnections,
+    updateMember,
+    getConnectionState,
   } = useMember(currentUserId);
 
   const { followers, following } = getVisibleConnections(member.id);
+  const connectionState = getConnectionState(member.id);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    updateMember(member.id, {
+      ...member,
+      ...editableFields,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditableFields({
+      username: member.username,
+      bio: member.bio,
+      weight: { ...member.weight },
+    });
+    setIsEditing(false);
+  };
+
+  const handleFieldChange = (
+    field: keyof EditableFields,
+    value: string | number
+  ) => {
+    if (field === "weight") {
+      setEditableFields((prev) => ({
+        ...prev,
+        weight: {
+          ...prev.weight,
+          value: Number(value),
+        },
+      }));
+    } else {
+      setEditableFields((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  const handlePhotoUpload = (file: File) => {
+    // In a real app, you would upload the file to a server
+    // For now, we'll create a local URL
+    const url = URL.createObjectURL(file);
+    updateMember(member.id, {
+      ...member,
+      profilePhoto: url,
+    });
+  };
+
+  const handleTrainingArtsChange = (arts: TrainingArt[]) => {
+    updateMember(member.id, {
+      ...member,
+      trainingArts: arts,
+    });
+  };
+
+  const renderMemberActions = () => {
+    if (isOwnProfile) return null;
+
+    return (
+      <div className="flex items-center gap-2">
+        {/* Chat Button */}
+        <button
+          onClick={() => handleChat(member.id)}
+          className="btn btn-ghost btn-sm btn-circle"
+          title="Chat"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+        </button>
+
+        {/* Follow/Unfollow Button */}
+        <button
+          onClick={() =>
+            connectionState.isFollowing
+              ? handleUnfollow(member.id)
+              : handleFollow(member)
+          }
+          className="btn btn-ghost btn-sm btn-circle"
+          title={connectionState.isFollowing ? "Unfollow" : "Follow"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={
+                connectionState.isFollowing
+                  ? "M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                  : "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+              }
+            />
+          </svg>
+        </button>
+
+        {/* Block/Unblock Button */}
+        <button
+          onClick={() =>
+            connectionState.isBlocked
+              ? handleUnblock(member.id)
+              : handleBlock(member)
+          }
+          className="btn btn-ghost btn-sm btn-circle"
+          title={connectionState.isBlocked ? "Unblock" : "Block"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+            />
+          </svg>
+        </button>
+      </div>
+    );
+  };
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Profile Card */}
       <ProfileCard
-        currentUserId={currentUserId}
-        member={member}
-        isEditable={isOwnProfile}
-        onFollow={() => handleFollow(member)}
-        onUnfollow={() => handleUnfollow(member.id)}
-        onBlock={() => handleBlock(member)}
-        onUnblock={() => handleUnblock(member.id)}
-        onChat={() => handleChat(member.id)}
+        member={isEditing ? { ...member, ...editableFields } : member}
+        isOwnProfile={isOwnProfile}
+        onEdit={isOwnProfile ? handleEdit : undefined}
+        onPhotoUpload={isOwnProfile ? handlePhotoUpload : undefined}
+        onTrainingArtsChange={
+          isOwnProfile ? handleTrainingArtsChange : undefined
+        }
+        actions={renderMemberActions()}
       />
 
-      {member.privacySettings.connectionsVisibility && (
-        <ConnectionsCard
-          currentUserId={currentUserId}
-          followers={followers}
-          following={following}
-          isVisible={true}
-        />
+      {/* Edit Form */}
+      {isEditing && (
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title">Edit Profile</h3>
+            <div className="form-control space-y-4">
+              <div>
+                <label className="label">
+                  <span className="label-text">Username</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={editableFields.username}
+                  onChange={(e) =>
+                    handleFieldChange("username", e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text">Bio</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered w-full"
+                  value={editableFields.bio}
+                  onChange={(e) => handleFieldChange("bio", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Weight ({member.weight.unit})
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full"
+                  value={editableFields.weight.value}
+                  onChange={(e) => handleFieldChange("weight", e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button className="btn btn-ghost" onClick={handleCancel}>
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={handleSave}>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Connections Card */}
+      <ConnectionsCard
+        currentUserId={currentUserId}
+        followers={followers}
+        following={following}
+        isVisible={member.privacySettings.connectionsVisibility}
+      />
     </div>
   );
 };

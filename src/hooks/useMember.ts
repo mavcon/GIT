@@ -11,7 +11,7 @@ export const useMember = (currentUserId: string) => {
     (dbMember: (typeof dummyMembers)[0]): Member => ({
       id: dbMember.id,
       username: dbMember.username,
-      profilePhoto: dbMember.profile_photo,
+      profilePhoto: dbMember.profile_photo || null,
       email: dbMember.email,
       dateOfBirth: dbMember.date_of_birth,
       trainingStartDate: dbMember.training_start_date,
@@ -46,20 +46,6 @@ export const useMember = (currentUserId: string) => {
     storageService.setMembers(convertedMembers);
     return convertedMembers;
   }, [convertDBMemberToMember]);
-
-  // Initialize storage with dummy data if empty
-  useEffect(() => {
-    const storage = localStorage.getItem("connections");
-    if (!storage) {
-      localStorage.setItem("connections", JSON.stringify([]));
-    }
-
-    const members = localStorage.getItem("members");
-    if (!members) {
-      const initialMembers = convertAndInitializeMembers();
-      localStorage.setItem("members", JSON.stringify(initialMembers));
-    }
-  }, [convertAndInitializeMembers]);
 
   const [members, setMembers] = useState<Member[]>(() => {
     const storedMembers = storageService.getMembers();
