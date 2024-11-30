@@ -9,24 +9,24 @@
 # production
 /build
 
-# environment variables
-.env
+# misc
+.DS_Store
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env
 
-# IDE specific files
-.idea/
-*.swp
-*.swo
-.DS_Store
-
-# debug logs
+# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-debug.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
 # Optional npm cache directory
 .npm
@@ -42,3 +42,49 @@ debug.log
 
 # Yarn Integrity file
 .yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*

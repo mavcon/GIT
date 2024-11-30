@@ -1,114 +1,117 @@
-# DojoLibre
+# Role-Based App
 
-A React-based web application for managing martial arts dojos, members, and training sessions.
+A React TypeScript application with role-based access control and various features including member management, dojo management, and Google Maps integration.
 
-## Features
+## Project Structure
 
-- Interactive dojo map with real-time status
-- Member profiles and connections
-- Training session management
-- Real-time notifications
-- Responsive design with dark mode support
+```
+role-based-app/
+├── public/           # Static files
+├── src/             # Source code
+│   ├── components/  # React components
+│   │   ├── common/  # Shared components
+│   │   ├── dojos/   # Dojo-related components
+│   │   └── members/ # Member-related components
+│   ├── context/     # React context providers
+│   ├── hooks/       # Custom React hooks
+│   ├── pages/       # Page components
+│   ├── services/    # API and utility services
+│   ├── types/       # TypeScript type definitions
+│   └── utils/       # Utility functions
+└── .env             # Environment variables
+```
 
-## Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- Google Maps API key
-
-## Installation
+## Getting Started
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/mavcon/GIT.git
 cd role-based-app
 ```
 
 2. Install dependencies:
 ```bash
 npm install
-# or
-yarn install
 ```
 
-3. Create a `.env` file in the root directory and add your Google Maps API key:
-```
-REACT_APP_GOOGLE_MAPS_API_KEY=your_api_key_here
-```
+3. Create a `.env` file based on `.env.example` and configure your environment variables.
 
 4. Start the development server:
 ```bash
 npm start
-# or
-yarn start
 ```
 
-## IDE Setup
+## Collaboration Guidelines
 
-### VS Code
-1. Install recommended extensions:
-   - ESLint
-   - Prettier
-   - TypeScript and JavaScript Language Features
-2. Use workspace settings from `.vscode/settings.json`
-3. Install project dependencies
-4. Start the development server
+### Git Workflow
 
-### WebStorm/IntelliJ IDEA
-1. Open the project folder
-2. Install TypeScript from npm (if not already installed)
-3. Configure the TypeScript compiler:
-   - Use project version of TypeScript
-   - Enable TSLint/ESLint integration
-4. Install project dependencies
-5. Start the development server
-
-### Other IDEs
-1. Ensure TypeScript support is enabled
-2. Configure ESLint integration
-3. Set up Prettier for code formatting
-4. Install project dependencies
-5. Start the development server
-
-## Project Structure
-
+1. Always pull the latest changes before starting work:
+```bash
+git pull origin master
 ```
-role-based-app/
-├── public/                 # Static files
-├── src/
-│   ├── components/        # React components
-│   │   ├── common/       # Shared components
-│   │   ├── dojos/       # Dojo-related components
-│   │   └── members/     # Member-related components
-│   ├── context/          # React context providers
-│   ├── hooks/            # Custom React hooks
-│   ├── pages/            # Page components
-│   ├── services/         # API and utility services
-│   ├── types/            # TypeScript type definitions
-│   └── utils/            # Helper functions
-├── .env                   # Environment variables
-├── .env.example          # Example environment variables
-├── package.json          # Project dependencies and scripts
-└── tsconfig.json         # TypeScript configuration
+
+2. Create a feature branch for your work:
+```bash
+git checkout -b feature/your-feature-name
 ```
+
+3. Make your changes and commit them with descriptive messages:
+```bash
+git add .
+git commit -m "feat: description of your changes"
+```
+
+4. Push your changes and create a pull request:
+```bash
+git push origin feature/your-feature-name
+```
+
+### Commit Message Format
+
+Follow the conventional commits specification:
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation changes
+- style: Code style changes (formatting, etc.)
+- refactor: Code changes that neither fix bugs nor add features
+- test: Adding or modifying tests
+- chore: Changes to build process or auxiliary tools
+
+### Code Style
+
+- Follow TypeScript best practices
+- Use functional components with hooks
+- Implement proper error handling
+- Write meaningful comments
+- Keep components small and focused
+- Use proper naming conventions
+
+### Testing
+
+- Write unit tests for new features
+- Ensure all tests pass before submitting PR
+- Include integration tests where necessary
 
 ## Available Scripts
 
-- `npm start`: Start development server
-- `npm build`: Build for production
+- `npm start`: Run development server
 - `npm test`: Run tests
-- `npm run eject`: Eject from Create React App
+- `npm run build`: Build for production
+- `npm run lint`: Run linter
+- `npm run format`: Format code
 
-## Environment Variables
+## Dependencies
 
-Required environment variables:
-
-- `REACT_APP_GOOGLE_MAPS_API_KEY`: Google Maps API key for the interactive map
+- React
+- TypeScript
+- Tailwind CSS
+- Google Maps API
+- Other major dependencies...
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
