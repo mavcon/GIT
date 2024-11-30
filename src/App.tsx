@@ -32,9 +32,9 @@ const AppContent = () => {
 
   return (
     <div className="App min-h-screen bg-base-200">
-      <header className="bg-base-100 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-12">
+      <header className="bg-base-100 shadow-lg fixed top-0 left-0 right-0 z-50 h-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex justify-between items-center h-full">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <img src="/DOJOLIBRE_LOGO2.svg" alt="DojoLibre" className="h-7" />
@@ -57,7 +57,7 @@ const AppContent = () => {
           </div>
         </div>
       </header>
-      <main>
+      <main className="mt-12">
         <RoleBasedRoutes userRole="member" currentUserId={currentUserId} />
         {toast.isVisible && (
           <Toast

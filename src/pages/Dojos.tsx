@@ -142,7 +142,7 @@ const Dojos: React.FC<DojosProps> = ({ currentUserId }) => {
       <h1 className="text-xl font-bold mb-4">Open Mats</h1>
       
       {/* Map Section */}
-      <div className="mb-4">
+      <div className="card bg-base-100 shadow-lg mb-4 overflow-hidden">
         <GoogleMap
           dojos={dojos}
           onMarkerClick={handleMarkerClick}
