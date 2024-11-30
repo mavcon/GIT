@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import ProfileImage from "./ProfileImage";
 
 interface ProfileMenuProps {
@@ -25,31 +26,15 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         />
       </label>
       {isOpen && (
-        <ul tabIndex={0} className="mt-3 p-2 shadow-lg menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
-          <li className="menu-title px-4 py-2">
-            <div className="flex items-center gap-3">
-              <ProfileImage
-                src={profilePhoto}
-                alt={username}
-                isOnline={isOnline}
-                size="sm"
-              />
-              <div>
-                <div className="font-bold">{username}</div>
-                <div className="text-xs opacity-50">Member</div>
-              </div>
-            </div>
-          </li>
-          <div className="divider my-0" />
+        <ul tabIndex={0} className="mt-3 p-2 shadow-lg menu menu-compact dropdown-content bg-base-100 rounded-box w-40">
           <li>
-            <a href="/profile">Profile</a>
+            <Link to="/members/1" onClick={() => setIsOpen(false)}>Profile</Link>
           </li>
           <li>
-            <a href="/settings">Settings</a>
+            <Link to="/settings" onClick={() => setIsOpen(false)}>Settings</Link>
           </li>
-          <div className="divider my-0" />
           <li>
-            <a href="/logout" className="text-error">Logout</a>
+            <Link to="/logout" onClick={() => setIsOpen(false)} className="text-error">Logout</Link>
           </li>
         </ul>
       )}
