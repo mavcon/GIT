@@ -11,6 +11,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --p: 199 84% 55%; /* light blue color: #38bdf8 */
+}
+
 /* Smooth transitions for theme changes */
 * {
   @apply transition-colors duration-200;

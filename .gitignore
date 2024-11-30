@@ -9,13 +9,36 @@
 # production
 /build
 
-# misc
-.DS_Store
+# environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# IDE specific files
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+debug.log
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity

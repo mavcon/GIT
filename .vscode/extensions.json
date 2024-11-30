@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "streetsidesoftware.code-spell-checker",
+    "naumovs.color-highlight",
+    "dsznajder.es7-react-js-snippets",
+    "christian-kohler.path-intellisense",
+    "csstools.postcss",
+    "wayou.vscode-todo-highlight"
+  ],
+  "unwantedRecommendations": []
+}

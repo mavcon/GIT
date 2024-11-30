@@ -32,7 +32,7 @@ const AppContent = () => {
 
   return (
     <div className="App min-h-screen bg-base-200">
-      <header className="bg-base-100 shadow-lg">
+      <header className="bg-base-100 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-12">
             <div className="flex items-center gap-3">
@@ -57,14 +57,16 @@ const AppContent = () => {
           </div>
         </div>
       </header>
-      <RoleBasedRoutes userRole="member" currentUserId={currentUserId} />
-      {toast.isVisible && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={handleCloseToast}
-        />
-      )}
+      <main>
+        <RoleBasedRoutes userRole="member" currentUserId={currentUserId} />
+        {toast.isVisible && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={handleCloseToast}
+          />
+        )}
+      </main>
     </div>
   );
 };
