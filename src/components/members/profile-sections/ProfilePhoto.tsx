@@ -1,6 +1,6 @@
 import React from "react";
 import { Member } from "../../../types/member";
-import styles from "./ProfileHeader.module.css";
+import ProfileImage from "../../common/ProfileImage";
 import { useTheme } from "../../../context/ThemeContext";
 
 interface ProfilePhotoProps {
@@ -47,10 +47,6 @@ const CameraIcon: React.FC = () => {
   );
 };
 
-const OnlineIndicator: React.FC = () => (
-  <div className="absolute bottom-1 right-1 w-4 h-4 bg-success rounded-full border-2 border-base-100" />
-);
-
 const UploadButton: React.FC<{
   onPhotoUpload: (file: File) => void;
 }> = ({ onPhotoUpload }) => {
@@ -82,17 +78,16 @@ const ProfilePhoto: React.FC<ProfilePhotoProps> = ({
   onPhotoUpload,
 }) => (
   <div className="relative shrink-0">
-    <div className={`relative ${member.isOnline ? styles.onlineIndicator : ""}`}>
-      <img
-        src={member.profilePhoto || "/default-avatar.png"}
+    <div className={`relative ${getStatusColor(member.accountStatus)}`}>
+      <ProfileImage
+        src={member.profilePhoto}
         alt={member.username}
-        className={`w-20 h-20 rounded-full object-cover ring-2 ${getStatusColor(
-          member.accountStatus
-        )}`}
+        isOnline={member.isOnline}
+        size="lg"
+        isEditable={isEditable}
+        onPhotoUpload={onPhotoUpload}
       />
-      {member.isOnline && <OnlineIndicator />}
     </div>
-    {isEditable && onPhotoUpload && <UploadButton onPhotoUpload={onPhotoUpload} />}
   </div>
 );
 

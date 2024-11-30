@@ -92,11 +92,13 @@ const RoleBasedRoutes: React.FC<RoleBasedRoutesProps> = ({
   };
 
   return (
-    <main className="container mx-auto py-6 px-4">
-      <Routes>
-        {renderRoutes()}
-        <Route path="*" element={<Navigate to={`/${userRole}`} replace />} />
-      </Routes>
+    <main className="py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Routes>
+          {renderRoutes()}
+          <Route path="*" element={<Navigate to={`/${userRole}`} replace />} />
+        </Routes>
+      </div>
     </main>
   );
 };

@@ -20,7 +20,7 @@ const ThemeSelector: React.FC = () => {
         Theme Preferences
       </h3>
       <div className="flex gap-4">
-        {(["light", "dark", "system"] as const).map((themeOption) => (
+        {(["light", "dark"] as const).map((themeOption) => (
           <button
             key={themeOption}
             onClick={() => setTheme(themeOption)}
@@ -60,22 +60,6 @@ const ThemeSelector: React.FC = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                />
-              </svg>
-            )}
-            {themeOption === "system" && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
             )}
@@ -331,7 +315,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserId }) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 max-w-4xl">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <h1 className={`text-xl font-bold mb-4 ${textClass}`}>Settings</h1>
       <div className="flex flex-col gap-4">
         <ThemeSelector />

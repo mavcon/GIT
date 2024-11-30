@@ -5,7 +5,7 @@ interface ProfileImageProps {
   src: string | null;
   alt: string;
   isOnline: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   isEditable?: boolean;
   onPhotoUpload?: (file: File) => void;
 }
@@ -26,6 +26,7 @@ const ProfileImage: React.FC<ProfileImageProps> = ({
   };
 
   const sizeClasses = {
+    xs: "w-7 h-7",
     sm: "w-10 h-10",
     md: "w-16 h-16",
     lg: "w-20 h-20",

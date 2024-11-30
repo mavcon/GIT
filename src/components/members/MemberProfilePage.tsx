@@ -16,7 +16,7 @@ const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   if (!member) return null;
 
   return (
-    <div className="container mx-auto px-4 py-4 max-w-4xl">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <h1 className="text-xl font-bold mb-4">Member Profile</h1>
       <div className="bg-base-100 rounded-lg p-4">
         <MemberProfile

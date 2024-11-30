@@ -7,20 +7,20 @@ import {
 
 const MemberNav: React.FC = () => {
   return (
-    <div className="flex space-x-8 items-center">
-      <a href="/stats" className="flex items-center text-base-content hover:text-base-content/80">
-        <ChartBarIcon className="h-6 w-6 mr-2" />
-        <span>Stats</span>
+    <nav className="flex items-center">
+      <a href="/stats" className="flex items-center gap-2 text-base-content/70 hover:text-base-content transition-colors px-6">
+        <ChartBarIcon className="h-5 w-5" />
+        <span className="text-sm">Stats</span>
       </a>
-      <a href="/dojos" className="flex items-center text-base-content hover:text-base-content/80">
-        <AcademicCapIcon className="h-6 w-6 mr-2" />
-        <span>Dojos</span>
+      <a href="/dojos" className="flex items-center gap-2 text-base-content/70 hover:text-base-content transition-colors px-6">
+        <AcademicCapIcon className="h-5 w-5" />
+        <span className="text-sm">Dojos</span>
       </a>
-      <a href="/community" className="flex items-center text-base-content hover:text-base-content/80">
-        <UserGroupIcon className="h-6 w-6 mr-2" />
-        <span>Community</span>
+      <a href="/community" className="flex items-center gap-2 text-base-content/70 hover:text-base-content transition-colors px-6">
+        <UserGroupIcon className="h-5 w-5" />
+        <span className="text-sm">Community</span>
       </a>
-    </div>
+    </nav>
   );
 };
 

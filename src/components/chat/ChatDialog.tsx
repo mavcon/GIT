@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Member } from "../../types/member";
+import ProfileImage from "../common/ProfileImage";
 
 interface Message {
   id: string;
@@ -46,18 +47,12 @@ const ChatDialog: React.FC<ChatDialogProps> = ({
         {/* Chat Header */}
         <div className="flex items-center justify-between p-4 border-b border-base-300">
           <div className="flex items-center gap-3">
-            <div className="avatar">
-              <div className="w-10 h-10 rounded-full relative">
-                <img
-                  src={otherMember.profilePhoto || "/default-avatar.png"}
-                  alt={otherMember.username}
-                  className="object-cover"
-                />
-                {otherMember.isOnline && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100"></div>
-                )}
-              </div>
-            </div>
+            <ProfileImage
+              src={otherMember.profilePhoto}
+              alt={otherMember.username}
+              isOnline={otherMember.isOnline}
+              size="sm"
+            />
             <div>
               <h3 className="font-semibold">{otherMember.username}</h3>
               <p className="text-xs text-base-content/70">
