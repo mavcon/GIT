@@ -11,6 +11,85 @@ A React application for managing member interactions and communications in a mar
 - Dojo management and check-ins
 - Stats and achievements tracking
 
+## Storage Service Implementation
+
+The application uses a robust storage service for managing state and real-time updates across components. Located in `src/services/storage.ts`, it implements a pub/sub pattern for real-time data synchronization.
+
+### Core Functionality
+
+1. Event System
+```typescript
+// Storage events for pub/sub
+export const STORAGE_EVENTS = {
+  MEMBERS_UPDATED: 'MEMBERS_UPDATED',
+  CHATS_UPDATED: 'CHATS_UPDATED',
+  NOTIFICATIONS_UPDATED: 'NOTIFICATIONS_UPDATED',
+  CONNECTIONS_UPDATED: 'CONNECTIONS_UPDATED'
+};
+```
+
+2. Event Handling
+```typescript
+// Dispatch events with data
+const dispatchStorageEvent = (eventName: string, data?: any) => {
+  if (listeners[eventName]) {
+    const event = new CustomEvent(eventName, { detail: data });
+    listeners[eventName].forEach(listener => listener(event));
+  }
+};
+
+// Add event listeners
+export const addStorageListener = (eventName: string, listener: Function) => {
+  if (!listeners[eventName]) {
+    listeners[eventName] = [];
+  }
+  listeners[eventName].push(listener);
+  return () => {
+    listeners[eventName] = listeners[eventName].filter(l => l !== listener);
+  };
+};
+```
+
+### Usage in Components
+
+```typescript
+// In your context provider
+useEffect(() => {
+  const handleDataUpdate = (event: CustomEvent<YourDataType[]>) => {
+    setData(event.detail);
+  };
+
+  const cleanup = storageService.addStorageListener(
+    STORAGE_EVENTS.YOUR_EVENT,
+    handleDataUpdate
+  );
+
+  return cleanup;
+}, []);
+```
+
+### Best Practices
+
+1. Event Handling:
+   - Always include data in event dispatches
+   - Type your event data properly
+   - Clean up listeners in useEffect returns
+
+2. Storage Operations:
+   - Keep operations atomic
+   - Dispatch events after successful storage updates
+   - Include complete data state in events
+
+3. Error Handling:
+   - Validate data before storage
+   - Handle storage failures gracefully
+   - Provide fallback data when storage is empty
+
+4. Performance:
+   - Batch updates when possible
+   - Use memoization for expensive operations
+   - Clean up unused listeners
+
 ## Chat System Implementation
 
 The chat system is implemented using the following components and patterns:
@@ -80,14 +159,6 @@ interface DBChat {
   updated_at: string;
 }
 ```
-
-### Storage Service
-
-The chat system uses the storage service (`src/services/storage.ts`) for:
-
-- Persisting chat messages
-- Managing chat state
-- Handling real-time updates
 
 ### Integration Points
 

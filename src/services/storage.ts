@@ -26,9 +26,10 @@ const CONNECTIONS_KEY = 'connections';
 const listeners: { [key: string]: Function[] } = {};
 
 // Storage event handling
-const dispatchStorageEvent = (eventName: string) => {
+const dispatchStorageEvent = (eventName: string, data?: any) => {
   if (listeners[eventName]) {
-    listeners[eventName].forEach(listener => listener());
+    const event = new CustomEvent(eventName, { detail: data });
+    listeners[eventName].forEach(listener => listener(event));
   }
 };
 
@@ -76,7 +77,7 @@ export const getMembers = (): Member[] => {
 
 export const setMembers = (members: Member[]) => {
   localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
-  dispatchStorageEvent(STORAGE_EVENTS.MEMBERS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.MEMBERS_UPDATED, members);
 };
 
 export const updateMember = (memberId: string, updates: Partial<Member>) => {
@@ -99,7 +100,7 @@ export const addConnection = (connection: Connection) => {
   const connections = getConnections();
   connections.push(connection);
   localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(connections));
-  dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED, connections);
 };
 
 export const removeConnection = (userId: string, targetUserId: string, connectionType: Connection['connectionType']) => {
@@ -108,7 +109,7 @@ export const removeConnection = (userId: string, targetUserId: string, connectio
     c => !(c.userId === userId && c.targetUserId === targetUserId && c.connectionType === connectionType)
   );
   localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(updatedConnections));
-  dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.CONNECTIONS_UPDATED, updatedConnections);
 };
 
 // Chat storage operations
@@ -120,7 +121,7 @@ export const getChats = (): DBChat[] => {
 
 export const setChats = (chats: DBChat[]) => {
   localStorage.setItem(CHATS_KEY, JSON.stringify(chats));
-  dispatchStorageEvent(STORAGE_EVENTS.CHATS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.CHATS_UPDATED, chats);
 };
 
 export const addChat = (chat: DBChat) => {
@@ -140,7 +141,7 @@ export const addStoredNotification = (notification: DBNotification) => {
   const notifications = getStoredNotifications();
   notifications.push(notification);
   localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
-  dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED, notifications);
 };
 
 export const updateStoredNotification = (notificationId: string, updates: Partial<DBNotification>) => {
@@ -149,7 +150,7 @@ export const updateStoredNotification = (notificationId: string, updates: Partia
   if (notificationIndex !== -1) {
     notifications[notificationIndex] = { ...notifications[notificationIndex], ...updates };
     localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
-    dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED);
+    dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED, notifications);
   }
 };
 
@@ -168,7 +169,7 @@ export const markAllStoredNotificationsAsRead = () => {
     read_at: new Date().toISOString()
   }));
   localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updatedNotifications));
-  dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED);
+  dispatchStorageEvent(STORAGE_EVENTS.NOTIFICATIONS_UPDATED, updatedNotifications);
 };
 
 // Default export with all methods
