@@ -1,0 +1,24 @@
+@keyframes highlight {
+  0% {
+    background-color: rgba(var(--p), 0.2);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+.highlight-message {
+  animation: highlight 2s ease-out;
+}
+
+.message-container {
+  transition: all 0.3s ease-out;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.message-container:hover {
+  background-color: rgba(var(--b2), 0.1);
+}

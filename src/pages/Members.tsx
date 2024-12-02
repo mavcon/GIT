@@ -4,6 +4,7 @@ import MemberList from "../components/members/MemberList";
 import MemberProfile from "../components/members/MemberProfile";
 import { BlockedProfileCard } from "../context/ConnectionsContext";
 import { useMember } from "../hooks/useMember";
+import ChatCard from "../components/chat/ChatCard";
 
 interface MembersPageProps {
   currentUserId: string;
@@ -51,18 +52,26 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUserId }) => {
         <Route
           path="/"
           element={
-            <>
-              <h1 className="text-xl font-bold mb-4">Members</h1>
-              <MemberList
-                currentUserId={currentUserId}
-                members={getAllMembers()}
-                onFollow={handleFollow}
-                onUnfollow={handleUnfollow}
-                onBlock={handleBlock}
-                onUnblock={handleUnblock}
-                onChat={handleChat}
-              />
-            </>
+            <div className="space-y-6">
+              {/* Chat Section */}
+              <div className="h-[calc(50vh-4rem)]">
+                <ChatCard />
+              </div>
+
+              {/* Members Section */}
+              <div>
+                <h2 className="text-xl font-bold mb-4">Members</h2>
+                <MemberList
+                  currentUserId={currentUserId}
+                  members={getAllMembers()}
+                  onFollow={handleFollow}
+                  onUnfollow={handleUnfollow}
+                  onBlock={handleBlock}
+                  onUnblock={handleUnblock}
+                  onChat={handleChat}
+                />
+              </div>
+            </div>
           }
         />
         <Route path=":memberId" element={<MemberProfileRoute />} />

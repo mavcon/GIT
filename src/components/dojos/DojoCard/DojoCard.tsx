@@ -13,34 +13,45 @@ interface DojoCardProps {
   onCheckInOut?: (dojoId: string) => void;
   isCheckedIn?: boolean;
   id?: string;
+  currentUserId?: string;
 }
+
+const getCardClasses = (isOpen: boolean): string => {
+  const baseClasses = 'card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300';
+  const statusClasses = isOpen ? 'ring-2 ring-success ring-opacity-50' : '';
+  return `${baseClasses} ${statusClasses}`.trim();
+};
 
 const DojoCard: React.FC<DojoCardProps> = ({ 
   dojo, 
   onClick, 
   onCheckInOut, 
   isCheckedIn,
-  id
+  id,
+  currentUserId
 }) => {
+  const renderCardContent = () => (
+    <div className="card-body p-4">
+      <DojoHours dojo={dojo} />
+      <DojoAmenities dojo={dojo} />
+      <DojoCapacity dojo={dojo} />
+      <DojoAttendees dojo={dojo} currentUserId={currentUserId} />
+      <DojoCheckInButton 
+        dojo={dojo} 
+        onCheckInOut={onCheckInOut} 
+        isCheckedIn={isCheckedIn} 
+      />
+    </div>
+  );
+
   return (
     <div 
       id={id}
-      className={`card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300
-        ${dojo.isOpen ? 'ring-2 ring-success ring-opacity-50' : ''}`}
+      className={getCardClasses(dojo.isOpen)}
       onClick={onClick}
     >
       <DojoHeader dojo={dojo} />
-      <div className="card-body p-4">
-        <DojoHours dojo={dojo} />
-        <DojoAmenities dojo={dojo} />
-        <DojoCapacity dojo={dojo} />
-        <DojoAttendees dojo={dojo} />
-        <DojoCheckInButton 
-          dojo={dojo} 
-          onCheckInOut={onCheckInOut} 
-          isCheckedIn={isCheckedIn} 
-        />
-      </div>
+      {renderCardContent()}
     </div>
   );
 };

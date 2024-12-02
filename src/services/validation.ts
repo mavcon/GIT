@@ -7,206 +7,280 @@ export class ValidationError extends Error {
   }
 }
 
-export const ConnectionPolicies = {
-  MAX_CONNECTIONS: 1000,
-  MIN_USERNAME_LENGTH: 3,
-  MAX_USERNAME_LENGTH: 20,
+const POLICIES = {
+  connection: {
+    MAX_CONNECTIONS: 1000,
+    MIN_USERNAME_LENGTH: 3,
+    MAX_USERNAME_LENGTH: 20,
+  },
+  member: {
+    MIN_USERNAME_LENGTH: 3,
+    MAX_USERNAME_LENGTH: 20,
+    MIN_BIO_LENGTH: 10,
+    MAX_BIO_LENGTH: 500,
+    MIN_AGE: 13,
+    MAX_AGE: 100,
+  },
+  chat: {
+    MAX_MESSAGE_LENGTH: 1000,
+    MAX_MESSAGES_PER_DAY: 100,
+  },
+} as const;
+
+export const { connection: ConnectionPolicies, member: MemberPolicies, chat: ChatPolicies } = POLICIES;
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+type ValidationRule<T> = {
+  test: (value: T) => boolean;
+  message: string;
 };
 
-export const MemberPolicies = {
-  MIN_USERNAME_LENGTH: 3,
-  MAX_USERNAME_LENGTH: 20,
-  MIN_BIO_LENGTH: 10,
-  MAX_BIO_LENGTH: 500,
-  MIN_AGE: 13,
-  MAX_AGE: 100,
-};
+type Validator<T> = (value: Partial<T>) => ValidationResult;
 
-export const ChatPolicies = {
-  MAX_MESSAGE_LENGTH: 1000,
-  MAX_MESSAGES_PER_DAY: 100,
-};
+const createErrorMessage = (field: string, reason: string): string => 
+  `${field}: ${reason}`;
 
-const validateRequiredFields = (member: Partial<Member>): string[] => {
-  const errors: string[] = [];
-  const requiredFields = [
-    "username",
-    "email",
-    "dateOfBirth",
-    "trainingStartDate",
-    "trainingArts",
-    "bio",
-  ] as const;
+const createLengthError = (field: string, type: 'min' | 'max', length: number): string =>
+  createErrorMessage(field, `must be ${type === 'min' ? 'at least' : 'less than'} ${length} characters`);
 
-  requiredFields.forEach((field) => {
-    if (!member[field]) {
-      errors.push(`${field} is required`);
+const createValidator = <T>(
+  validationFn: (value: Partial<T>) => string[]
+): Validator<T> => (value: Partial<T>): ValidationResult => ({
+  isValid: validationFn(value).length === 0,
+  errors: validationFn(value),
+});
+
+const REQUIRED_MEMBER_FIELDS = [
+  "username",
+  "email",
+  "dateOfBirth",
+  "trainingStartDate",
+  "trainingArts",
+  "bio",
+  "gender",
+] as const;
+
+const validateRequiredFields = (member: Partial<Member>): ValidationResult => ({
+  isValid: REQUIRED_MEMBER_FIELDS.every(field => member[field]),
+  errors: REQUIRED_MEMBER_FIELDS
+    .filter(field => !member[field])
+    .map(field => createErrorMessage(field, "is required")),
+});
+
+const USERNAME_RULES: ValidationRule<string>[] = [
+  {
+    test: (username) => username.length >= MemberPolicies.MIN_USERNAME_LENGTH,
+    message: createLengthError("Username", "min", MemberPolicies.MIN_USERNAME_LENGTH),
+  },
+  {
+    test: (username) => username.length <= MemberPolicies.MAX_USERNAME_LENGTH,
+    message: createLengthError("Username", "max", MemberPolicies.MAX_USERNAME_LENGTH),
+  },
+  {
+    test: (username) => /^[a-zA-Z0-9_]+$/.test(username),
+    message: createErrorMessage("Username", "can only contain letters, numbers, and underscores"),
+  },
+];
+
+const EMAIL_RULES: ValidationRule<string>[] = [
+  {
+    test: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    message: createErrorMessage("Email", "invalid format"),
+  },
+];
+
+const validateIdentity = createValidator<Pick<Member, "username" | "email">>(
+  (identity) => {
+    const errors: string[] = [];
+
+    if (identity.username) {
+      USERNAME_RULES
+        .filter(rule => !rule.test(identity.username!))
+        .forEach(rule => errors.push(rule.message));
     }
-  });
-  return errors;
-};
 
-const validateUsername = (username?: string): string[] => {
-  const errors: string[] = [];
-  if (!username) return errors;
+    if (identity.email) {
+      EMAIL_RULES
+        .filter(rule => !rule.test(identity.email!))
+        .forEach(rule => errors.push(rule.message));
+    }
 
-  if (username.length < MemberPolicies.MIN_USERNAME_LENGTH) {
-    errors.push(
-      `Username must be at least ${MemberPolicies.MIN_USERNAME_LENGTH} characters long`
-    );
-  }
-  if (username.length > MemberPolicies.MAX_USERNAME_LENGTH) {
-    errors.push(
-      `Username must be less than ${MemberPolicies.MAX_USERNAME_LENGTH} characters long`
-    );
-  }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    errors.push("Username can only contain letters, numbers, and underscores");
-  }
-  return errors;
-};
-
-const validateEmail = (email?: string): string[] => {
-  const errors: string[] = [];
-  if (!email) return errors;
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    errors.push("Invalid email format");
-  }
-  return errors;
-};
-
-const validateDateOfBirth = (dateOfBirth?: string): string[] => {
-  const errors: string[] = [];
-  if (!dateOfBirth) return errors;
-
-  const dob = new Date(dateOfBirth);
-  if (isNaN(dob.getTime())) {
-    errors.push("Invalid date of birth");
     return errors;
   }
+);
 
-  const now = new Date();
-  const age = now.getFullYear() - dob.getFullYear();
+const validateDate = (date: string, field: string): string[] => {
+  const parsedDate = new Date(date);
+  return isNaN(parsedDate.getTime()) 
+    ? [createErrorMessage(field, "invalid date format")]
+    : [];
+};
 
+const validateAge = (dateOfBirth: string): string[] => {
+  const dob = new Date(dateOfBirth);
+  const age = new Date().getFullYear() - dob.getFullYear();
+  
   if (age < MemberPolicies.MIN_AGE) {
-    errors.push(`Must be at least ${MemberPolicies.MIN_AGE} years old`);
+    return [createErrorMessage("Age", `must be at least ${MemberPolicies.MIN_AGE} years`)];
   }
   if (age > MemberPolicies.MAX_AGE) {
-    errors.push("Invalid age");
+    return [createErrorMessage("Age", "exceeds maximum allowed")];
   }
-
-  return errors;
+  return [];
 };
 
-const validateTrainingStartDate = (trainingStartDate?: string): string[] => {
-  const errors: string[] = [];
-  if (!trainingStartDate) return errors;
+const validateTrainingStartDate = (date: string): string[] => {
+  const startDate = new Date(date);
+  return startDate > new Date()
+    ? [createErrorMessage("Training start date", "cannot be in the future")]
+    : [];
+};
 
-  const startDate = new Date(trainingStartDate);
-  if (isNaN(startDate.getTime())) {
-    errors.push("Invalid training start date");
+const validateDates = createValidator<Pick<Member, "dateOfBirth" | "trainingStartDate">>(
+  (dates) => {
+    const errors: string[] = [];
+
+    if (dates.dateOfBirth) {
+      errors.push(
+        ...validateDate(dates.dateOfBirth, "Date of birth"),
+        ...validateAge(dates.dateOfBirth)
+      );
+    }
+
+    if (dates.trainingStartDate) {
+      errors.push(
+        ...validateDate(dates.trainingStartDate, "Training start date"),
+        ...validateTrainingStartDate(dates.trainingStartDate)
+      );
+    }
+
     return errors;
   }
+);
 
-  const now = new Date();
-  if (startDate > now) {
-    errors.push("Training start date cannot be in the future");
-  }
+const VALID_TRAINING_ARTS = ["BJJ", "Wrestling", "Submission Grappling"] as const;
 
-  return errors;
-};
-
-export const validateTrainingArts = (arts: string[]): TrainingArt[] => {
-  const validArts: TrainingArt[] = ["BJJ", "Wrestling", "Submission Grappling"];
-  return arts.filter((art): art is TrainingArt =>
-    validArts.includes(art as TrainingArt)
-  );
-};
-
-const validateTrainingArtsArray = (arts?: TrainingArt[]): string[] => {
+const validateBio = (bio: string): string[] => {
   const errors: string[] = [];
-  if (!arts) return errors;
-
-  const validArts = ["BJJ", "Wrestling", "Submission Grappling"];
-  arts.forEach((art) => {
-    if (!validArts.includes(art)) {
-      errors.push(`Invalid training art: ${art}`);
-    }
-  });
-  return errors;
-};
-
-const validateBio = (bio?: string): string[] => {
-  const errors: string[] = [];
-  if (!bio) return errors;
-
+  
   if (bio.length < MemberPolicies.MIN_BIO_LENGTH) {
-    errors.push(
-      `Bio must be at least ${MemberPolicies.MIN_BIO_LENGTH} characters long`
-    );
+    errors.push(createLengthError("Bio", "min", MemberPolicies.MIN_BIO_LENGTH));
   }
   if (bio.length > MemberPolicies.MAX_BIO_LENGTH) {
-    errors.push(
-      `Bio must be less than ${MemberPolicies.MAX_BIO_LENGTH} characters long`
-    );
+    errors.push(createLengthError("Bio", "max", MemberPolicies.MAX_BIO_LENGTH));
   }
+  
   return errors;
 };
 
-const validateMeasurement = (
-  value: { value: number; unit: string } | undefined,
+const validateTrainingArt = (art: string): string[] =>
+  VALID_TRAINING_ARTS.includes(art as TrainingArt)
+    ? []
+    : [createErrorMessage("Training art", `invalid value: ${art}`)];
+
+const validateGender = (gender: string): string[] =>
+  ["male", "female"].includes(gender)
+    ? []
+    : [createErrorMessage("Gender", "must be either 'male' or 'female'")];
+
+const validateProfile = createValidator<Pick<Member, "bio" | "trainingArts" | "gender">>(
+  (profile) => {
+    const errors: string[] = [];
+
+    if (profile.bio) {
+      errors.push(...validateBio(profile.bio));
+    }
+
+    if (profile.trainingArts) {
+      profile.trainingArts.forEach(art => {
+        errors.push(...validateTrainingArt(art));
+      });
+    }
+
+    if (profile.gender) {
+      errors.push(...validateGender(profile.gender));
+    }
+
+    return errors;
+  }
+);
+
+const validateSingleMeasurement = (
+  measurement: { value: number; unit: string },
   type: "weight" | "height"
 ): string[] => {
   const errors: string[] = [];
-  if (!value) return errors;
-
-  if (value.value <= 0) {
-    errors.push(`${type} must be greater than 0`);
-  }
-
   const validUnits = type === "weight" ? ["kg", "lbs"] : ["cm", "ft"];
-  if (!validUnits.includes(value.unit)) {
-    errors.push(`Invalid ${type} unit`);
+
+  if (measurement.value <= 0) {
+    errors.push(createErrorMessage(type, "must be greater than 0"));
+  }
+
+  if (!validUnits.includes(measurement.unit)) {
+    errors.push(createErrorMessage(type, `invalid unit: ${measurement.unit}`));
   }
 
   return errors;
 };
 
-const validatePrivacySettings = (
-  settings?: Member["privacySettings"]
-): string[] => {
-  const errors: string[] = [];
-  if (!settings) return errors;
+const validateMeasurements = createValidator<Pick<Member, "weight" | "height">>(
+  (measurements) => {
+    const errors: string[] = [];
 
-  const requiredSettings = [
-    "ageVisibility",
-    "weightVisibility",
-    "heightVisibility",
-    "connectionsVisibility",
-  ] as const;
-
-  requiredSettings.forEach((setting) => {
-    if (typeof settings[setting] !== "boolean") {
-      errors.push(`Invalid ${setting} setting`);
+    if (measurements.weight) {
+      errors.push(...validateSingleMeasurement(measurements.weight, "weight"));
     }
-  });
 
-  return errors;
-};
+    if (measurements.height) {
+      errors.push(...validateSingleMeasurement(measurements.height, "height"));
+    }
+
+    return errors;
+  }
+);
+
+const PRIVACY_SETTINGS = [
+  "ageVisibility",
+  "weightVisibility",
+  "heightVisibility",
+  "connectionsVisibility",
+] as const;
+
+const validatePrivacySettings = createValidator<Member["privacySettings"]>(
+  (settings) => {
+    if (!settings) return [];
+
+    return PRIVACY_SETTINGS
+      .filter(setting => settings[setting] !== undefined && typeof settings[setting] !== "boolean")
+      .map(setting => createErrorMessage(setting, "must be a boolean value"));
+  }
+);
+
+export const validateTrainingArts = (arts: string[]): TrainingArt[] =>
+  arts.filter((art): art is TrainingArt =>
+    VALID_TRAINING_ARTS.includes(art as TrainingArt)
+  );
 
 export const validateMember = (member: Partial<Member>): string[] => {
+  const requiredFieldsResult = validateRequiredFields(member);
+  if (!requiredFieldsResult.isValid) {
+    return requiredFieldsResult.errors;
+  }
+
   return [
-    ...validateRequiredFields(member),
-    ...validateUsername(member.username),
-    ...validateEmail(member.email),
-    ...validateDateOfBirth(member.dateOfBirth),
-    ...validateTrainingStartDate(member.trainingStartDate),
-    ...validateTrainingArtsArray(member.trainingArts),
-    ...validateBio(member.bio),
-    ...validateMeasurement(member.weight, "weight"),
-    ...validateMeasurement(member.height, "height"),
-    ...validatePrivacySettings(member.privacySettings),
-  ];
+    validateIdentity(member),
+    validateDates(member),
+    validateProfile(member),
+    validateMeasurements(member),
+    member.privacySettings
+      ? validatePrivacySettings(member.privacySettings)
+      : { isValid: true, errors: [] },
+  ].reduce<string[]>(
+    (allErrors, result) => [...allErrors, ...result.errors],
+    []
+  );
 };

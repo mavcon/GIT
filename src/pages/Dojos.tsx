@@ -3,10 +3,14 @@ import { DojoLocation } from '../types/dojo';
 import DojoCard from '../components/dojos/DojoCard/DojoCard';
 import Toast from '../components/common/Toast';
 import GoogleMap from '../components/common/GoogleMap';
+import { dummyMembers } from '../db/dummy-data';
 
 interface DojosProps {
   currentUserId: string;
 }
+
+// Get actual member IDs from dummy data
+const memberIds = dummyMembers.map(member => member.id);
 
 // Temporary dummy data until we connect to the backend
 const dummyDojos: { [key: string]: DojoLocation } = {
@@ -35,10 +39,10 @@ const dummyDojos: { [key: string]: DojoLocation } = {
       hasLockers: true
     },
     capacity: {
-      current: 15,
+      current: 3,
       maximum: 50
     },
-    checkedInMembers: ['member-1', 'member-2', 'member-3'],
+    checkedInMembers: [memberIds[0], memberIds[1], memberIds[2]], // First 3 members
     isOpen: true
   },
   'dojo-2': {
@@ -66,10 +70,10 @@ const dummyDojos: { [key: string]: DojoLocation } = {
       hasLockers: false
     },
     capacity: {
-      current: 12,
+      current: 2,
       maximum: 40
     },
-    checkedInMembers: ['member-4', 'member-5'],
+    checkedInMembers: [memberIds[3], memberIds[4]], // Next 2 members
     isOpen: true
   },
   'dojo-3': {
@@ -97,10 +101,10 @@ const dummyDojos: { [key: string]: DojoLocation } = {
       hasLockers: true
     },
     capacity: {
-      current: 8,
+      current: 1,
       maximum: 30
     },
-    checkedInMembers: ['member-6'],
+    checkedInMembers: [memberIds[0]], // First member also trains here
     isOpen: false
   }
 };
@@ -118,6 +122,16 @@ const Dojos: React.FC<DojosProps> = ({ currentUserId }) => {
 
     setCheckedInDojoId(prevId => {
       const isCheckingIn = prevId !== dojoId;
+      
+      // Update the dojo's capacity and checked-in members
+      if (isCheckingIn) {
+        dojo.capacity.current += 1;
+        dojo.checkedInMembers.push(currentUserId);
+      } else {
+        dojo.capacity.current -= 1;
+        dojo.checkedInMembers = dojo.checkedInMembers.filter(id => id !== currentUserId);
+      }
+
       setToast({
         message: isCheckingIn 
           ? `Successfully checked in to ${dojo.name}` 
@@ -126,7 +140,7 @@ const Dojos: React.FC<DojosProps> = ({ currentUserId }) => {
       });
       return isCheckingIn ? dojoId : null;
     });
-  }, []);
+  }, [currentUserId]);
 
   const handleMarkerClick = useCallback((dojo: DojoLocation) => {
     setSelectedDojo(dojo);
@@ -160,6 +174,7 @@ const Dojos: React.FC<DojosProps> = ({ currentUserId }) => {
             isCheckedIn={checkedInDojoId === dojo.id}
             onClick={() => setSelectedDojo(dojo)}
             id={`dojo-card-${dojo.id}`}
+            currentUserId={currentUserId}
           />
         ))}
       </div>

@@ -1,121 +1,185 @@
-# Role-Based App
+# Role Based App
 
-A React TypeScript application with role-based access control and various features including member management, dojo management, and Google Maps integration.
+A React application for managing member interactions and communications in a martial arts community.
 
-## Project Structure
+## Features
 
+- Member management with roles and permissions
+- Member profiles with training information
+- Connection system (following/blocking)
+- Real-time chat functionality
+- Dojo management and check-ins
+- Stats and achievements tracking
+
+## Chat System Implementation
+
+The chat system is implemented using the following components and patterns:
+
+### Core Components
+
+1. `ChatCard.tsx`
+
+   - Split-panel interface with recent chats and active conversation
+   - Left panel shows chat list with unread indicators
+   - Right panel displays active conversation
+   - Real-time message updates
+   - Online/offline status indicators
+
+2. `ChatContext.tsx`
+
+   - Global state management for chat functionality
+   - Handles message sending/receiving
+   - Manages active chat state
+   - Tracks unread message counts
+
+3. `ChatDialog.tsx`
+   - Modal dialog for chat interactions
+   - Used for popup chat windows
+   - Shares core functionality with ChatCard
+
+### Types and Interfaces
+
+Located in `src/types/chat.ts`:
+
+```typescript
+interface Message {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  timestamp: string;
+  read: boolean;
+}
+
+interface Chat {
+  id: string;
+  participants: string[];
+  lastMessage?: Message;
+  unreadCount: number;
+}
+
+interface ChatState {
+  chats: Chat[];
+  activeChat: string | null;
+  messages: { [chatId: string]: Message[] };
+}
 ```
-role-based-app/
-├── public/           # Static files
-├── src/             # Source code
-│   ├── components/  # React components
-│   │   ├── common/  # Shared components
-│   │   ├── dojos/   # Dojo-related components
-│   │   └── members/ # Member-related components
-│   ├── context/     # React context providers
-│   ├── hooks/       # Custom React hooks
-│   ├── pages/       # Page components
-│   ├── services/    # API and utility services
-│   ├── types/       # TypeScript type definitions
-│   └── utils/       # Utility functions
-└── .env             # Environment variables
+
+### Database Schema
+
+Located in `src/db/schema.ts`:
+
+```typescript
+interface DBChat {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
+}
 ```
+
+### Storage Service
+
+The chat system uses the storage service (`src/services/storage.ts`) for:
+
+- Persisting chat messages
+- Managing chat state
+- Handling real-time updates
+
+### Integration Points
+
+1. Members Page (`src/pages/Members.tsx`)
+
+   - Hosts the main chat interface
+   - Integrates with member listing
+   - Handles chat initialization
+
+2. Member Actions (`src/components/members/MemberActions.tsx`)
+
+   - Chat button in member cards
+   - Initiates new conversations
+
+3. App Root (`src/App.tsx`)
+   - Provides ChatProvider context
+   - Manages global chat state
+
+### Usage
+
+To use the chat system in other components:
+
+```typescript
+import { useChat } from "../../context/ChatContext";
+
+const YourComponent = () => {
+  const { state, sendMessage, markAsRead, setActiveChat } = useChat();
+
+  // Send a message
+  const handleSend = (receiverId: string, text: string) => {
+    sendMessage(receiverId, text);
+  };
+
+  // Open a chat
+  const handleChatOpen = (memberId: string) => {
+    const chatId = [currentUserId, memberId].sort().join("-");
+    setActiveChat(chatId);
+  };
+};
+```
+
+### Development Notes
+
+1. State Management:
+
+   - Uses React Context for global state
+   - Real-time updates through storage service events
+   - Optimistic updates for better UX
+
+2. Performance Considerations:
+
+   - Message pagination (to be implemented)
+   - Lazy loading of chat history
+   - Efficient message storage and retrieval
+
+3. Future Improvements:
+   - Message search functionality
+   - File attachments
+   - Read receipts
+   - Typing indicators
+   - Message reactions
+   - Group chats
 
 ## Getting Started
 
-1. Clone the repository:
-```bash
-git clone https://github.com/mavcon/GIT.git
-cd role-based-app
-```
-
+1. Clone the repository
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
-3. Create a `.env` file based on `.env.example` and configure your environment variables.
+3. Start the development server:
 
-4. Start the development server:
 ```bash
 npm start
 ```
 
-## Collaboration Guidelines
+## Environment Variables
 
-### Git Workflow
+Create a `.env` file with:
 
-1. Always pull the latest changes before starting work:
-```bash
-git pull origin master
 ```
-
-2. Create a feature branch for your work:
-```bash
-git checkout -b feature/your-feature-name
+REACT_APP_API_URL=your_api_url
 ```
-
-3. Make your changes and commit them with descriptive messages:
-```bash
-git add .
-git commit -m "feat: description of your changes"
-```
-
-4. Push your changes and create a pull request:
-```bash
-git push origin feature/your-feature-name
-```
-
-### Commit Message Format
-
-Follow the conventional commits specification:
-- feat: A new feature
-- fix: A bug fix
-- docs: Documentation changes
-- style: Code style changes (formatting, etc.)
-- refactor: Code changes that neither fix bugs nor add features
-- test: Adding or modifying tests
-- chore: Changes to build process or auxiliary tools
-
-### Code Style
-
-- Follow TypeScript best practices
-- Use functional components with hooks
-- Implement proper error handling
-- Write meaningful comments
-- Keep components small and focused
-- Use proper naming conventions
-
-### Testing
-
-- Write unit tests for new features
-- Ensure all tests pass before submitting PR
-- Include integration tests where necessary
-
-## Available Scripts
-
-- `npm start`: Run development server
-- `npm test`: Run tests
-- `npm run build`: Build for production
-- `npm run lint`: Run linter
-- `npm run format`: Format code
-
-## Dependencies
-
-- React
-- TypeScript
-- Tailwind CSS
-- Google Maps API
-- Other major dependencies...
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+1. Create a feature branch
+2. Make your changes
+3. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT

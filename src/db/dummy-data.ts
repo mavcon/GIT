@@ -1,5 +1,5 @@
-import { DBMember, DBConnection, DBChat } from "./schema";
-import { Member, Connection, TrainingArt } from "../types/member";
+import { DBMember, DBChat, DBNotification } from "./schema";
+import { Member, TrainingArt } from "../types/member";
 
 export const dummyMembers: DBMember[] = [
   {
@@ -12,6 +12,7 @@ export const dummyMembers: DBMember[] = [
     training_start_date: "2020-06-15",
     training_arts: ["BJJ", "Wrestling", "Submission Grappling"],
     bio: "Passionate about BJJ and always learning",
+    gender: "male",
     weight_value: 75,
     weight_unit: "kg",
     height_value: 175,
@@ -39,6 +40,7 @@ export const dummyMembers: DBMember[] = [
     training_start_date: "2019-01-10",
     training_arts: ["BJJ", "Wrestling"],
     bio: "Wrestling background, now focused on BJJ",
+    gender: "female",
     weight_value: 63,
     weight_unit: "kg",
     height_value: 165,
@@ -66,6 +68,7 @@ export const dummyMembers: DBMember[] = [
     training_start_date: "2021-02-01",
     training_arts: ["Wrestling", "Submission Grappling"],
     bio: "New to grappling, loving the journey",
+    gender: "male",
     weight_value: 82,
     weight_unit: "kg",
     height_value: 180,
@@ -93,6 +96,7 @@ export const dummyMembers: DBMember[] = [
     training_start_date: "2018-05-20",
     training_arts: ["BJJ", "Wrestling", "Submission Grappling"],
     bio: "Competitive grappler, always looking to improve",
+    gender: "male",
     weight_value: 70,
     weight_unit: "kg",
     height_value: 170,
@@ -109,102 +113,16 @@ export const dummyMembers: DBMember[] = [
     last_active: new Date().toISOString(),
     created_at: "2023-01-04T00:00:00Z",
     updated_at: "2023-01-04T00:00:00Z",
-  },
-  {
-    id: "5",
-    username: "emilywong",
-    email: "emily@example.com",
-    password_hash: "hashed_password_5",
-    profile_photo: "https://i.pravatar.cc/300?img=25",
-    date_of_birth: "1993-09-12",
-    training_start_date: "2017-03-15",
-    training_arts: ["BJJ", "Wrestling"],
-    bio: "BJJ brown belt, wrestling coach",
-    weight_value: 58,
-    weight_unit: "kg",
-    height_value: 162,
-    height_unit: "cm",
-    privacy_settings: {
-      age_visibility: true,
-      weight_visibility: true,
-      height_visibility: true,
-      connections_visibility: true,
-    },
-    membership_status: "free",
-    account_status: "banned",
-    is_online: true,
-    last_active: new Date().toISOString(),
-    created_at: "2023-01-05T00:00:00Z",
-    updated_at: "2023-01-05T00:00:00Z",
-  },
-];
-
-// Initial connections - Each connection is unique and bidirectional
-export const initialConnections: Connection[] = [
-  // John follows Sarah
-  {
-    id: "1-2-following",
-    userId: "1",
-    targetUserId: "2",
-    username: "sarahsmith",
-    profilePhoto: "https://i.pravatar.cc/300?img=47",
-    connectionType: "following",
-    isOnline: true,
-    lastActive: new Date().toISOString(),
-  },
-  // Sarah follows John
-  {
-    id: "2-1-following",
-    userId: "2",
-    targetUserId: "1",
-    username: "johndoe",
-    profilePhoto: "https://i.pravatar.cc/300?img=11",
-    connectionType: "following",
-    isOnline: true,
-    lastActive: new Date().toISOString(),
-  },
-  // Mike follows Sarah
-  {
-    id: "3-2-following",
-    userId: "3",
-    targetUserId: "2",
-    username: "sarahsmith",
-    profilePhoto: "https://i.pravatar.cc/300?img=47",
-    connectionType: "following",
-    isOnline: true,
-    lastActive: new Date().toISOString(),
-  },
-  // Emily follows Sarah
-  {
-    id: "5-2-following",
-    userId: "5",
-    targetUserId: "2",
-    username: "sarahsmith",
-    profilePhoto: "https://i.pravatar.cc/300?img=47",
-    connectionType: "following",
-    isOnline: true,
-    lastActive: new Date().toISOString(),
-  },
-  // Alex follows Emily
-  {
-    id: "4-5-following",
-    userId: "4",
-    targetUserId: "5",
-    username: "emilywong",
-    profilePhoto: "https://i.pravatar.cc/300?img=25",
-    connectionType: "following",
-    isOnline: true,
-    lastActive: new Date().toISOString(),
-  },
+  }
 ];
 
 export const dummyChats: DBChat[] = [
   {
     id: "1",
-    sender_id: "1",
-    receiver_id: "2",
-    message: "Hey Sarah, how's training going?",
-    is_read: true,
+    sender_id: "2",
+    receiver_id: "1",
+    message: "Hey John, want to drill the new techniques before class?",
+    is_read: false,
     created_at: "2024-01-20T10:00:00Z",
     updated_at: "2024-01-20T10:00:00Z",
   },
@@ -212,8 +130,8 @@ export const dummyChats: DBChat[] = [
     id: "2",
     sender_id: "2",
     receiver_id: "1",
-    message: "Going great! Just learned a new technique today.",
-    is_read: true,
+    message: "I'll be there early around 5:30pm if that works for you.",
+    is_read: false,
     created_at: "2024-01-20T10:05:00Z",
     updated_at: "2024-01-20T10:05:00Z",
   },
@@ -226,6 +144,70 @@ export const dummyChats: DBChat[] = [
     created_at: "2024-01-20T15:30:00Z",
     updated_at: "2024-01-20T15:30:00Z",
   },
+  {
+    id: "4",
+    sender_id: "4",
+    receiver_id: "1",
+    message: "Great rolls today! That new guard pass really helped.",
+    is_read: false,
+    created_at: "2024-01-20T16:00:00Z",
+    updated_at: "2024-01-20T16:00:00Z",
+  }
+];
+
+export const dummyNotifications: DBNotification[] = [
+  {
+    id: "n1",
+    recipient_id: "1",
+    type: "direct_message",
+    title: "Sarah Smith",
+    message: "Hey John, want to drill the new techniques before class?",
+    is_read: true, // This older message is read
+    sender_id: "2",
+    message_id: "1",
+    target_route: "/chat/2?messageId=1",
+    created_at: "2024-01-20T10:00:00Z",
+    updated_at: "2024-01-20T10:00:00Z"
+  },
+  {
+    id: "n2",
+    recipient_id: "1",
+    type: "direct_message",
+    title: "Sarah Smith",
+    message: "I'll be there early around 5:30pm if that works for you.",
+    is_read: false, // Unread follow-up message
+    sender_id: "2",
+    message_id: "2",
+    target_route: "/chat/2?messageId=2",
+    created_at: "2024-01-20T10:05:00Z",
+    updated_at: "2024-01-20T10:05:00Z"
+  },
+  {
+    id: "n3",
+    recipient_id: "1",
+    type: "direct_message",
+    title: "Mike Brown",
+    message: "Are you coming to open mat this weekend?",
+    is_read: false, // Unread message from different user
+    sender_id: "3",
+    message_id: "3",
+    target_route: "/chat/3?messageId=3",
+    created_at: "2024-01-20T15:30:00Z",
+    updated_at: "2024-01-20T15:30:00Z"
+  },
+  {
+    id: "n4",
+    recipient_id: "1",
+    type: "direct_message",
+    title: "Alex Chen",
+    message: "Great rolls today! That new guard pass really helped.",
+    is_read: false, // Unread message from another user
+    sender_id: "4",
+    message_id: "4",
+    target_route: "/chat/4?messageId=4",
+    created_at: "2024-01-20T16:00:00Z",
+    updated_at: "2024-01-20T16:00:00Z"
+  }
 ];
 
 // Helper function to convert DB member to frontend Member type
@@ -238,6 +220,7 @@ export const convertDBMemberToMember = (dbMember: DBMember): Member => ({
   trainingStartDate: dbMember.training_start_date,
   trainingArts: dbMember.training_arts as TrainingArt[],
   bio: dbMember.bio,
+  gender: dbMember.gender,
   weight: {
     value: dbMember.weight_value,
     unit: dbMember.weight_unit,

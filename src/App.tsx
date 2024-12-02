@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { ConnectionsProvider } from "./context/ConnectionsContext";
+import { ChatProvider } from "./context/ChatContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import RoleBasedRoutes from "./components/routing/RoleBasedRoutes";
 import MemberNav from "./components/navigation/MemberNav";
 import ProfileMenu from "./components/common/ProfileMenu";
 import NotificationBell from "./components/common/NotificationBell";
 import Toast from "./components/common/Toast";
 import { useMember } from "./hooks/useMember";
+import { useNotificationDemo } from "./hooks/useNotificationDemo";
 
 interface ToastState {
   message: string;
@@ -13,10 +16,15 @@ interface ToastState {
   isVisible: boolean;
 }
 
+// This would normally come from auth context
+const CURRENT_USER_ID = "1";
+
 const AppContent = () => {
-  const currentUserId = "1"; // This would normally come from auth context
-  const { getMemberById } = useMember(currentUserId);
-  const currentUser = getMemberById(currentUserId);
+  const { getMemberById } = useMember(CURRENT_USER_ID);
+  const currentUser = getMemberById(CURRENT_USER_ID);
+
+  // Initialize demo notifications
+  useNotificationDemo();
 
   const [toast, setToast] = useState<ToastState>({
     message: "",
@@ -47,7 +55,7 @@ const AppContent = () => {
               <MemberNav />
             </div>
             <div className="flex items-center gap-0">
-              <NotificationBell count={3} />
+              <NotificationBell />
               <ProfileMenu
                 username={currentUser.username}
                 profilePhoto={currentUser.profilePhoto || "/default-avatar.png"}
@@ -58,7 +66,7 @@ const AppContent = () => {
         </div>
       </header>
       <main className="mt-12">
-        <RoleBasedRoutes userRole="member" currentUserId={currentUserId} />
+        <RoleBasedRoutes userRole="member" currentUserId={CURRENT_USER_ID} />
         {toast.isVisible && (
           <Toast
             message={toast.message}
@@ -74,7 +82,11 @@ const AppContent = () => {
 const App = () => {
   return (
     <ConnectionsProvider>
-      <AppContent />
+      <ChatProvider currentUserId={CURRENT_USER_ID}>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </ChatProvider>
     </ConnectionsProvider>
   );
 };

@@ -242,9 +242,21 @@ const UserInformation: React.FC<{ member: Member }> = ({ member }) => {
           </span>
         </div>
         <div className="flex justify-between items-center">
+          <span className={`font-medium ${textClass}`}>Gender</span>
+          <span className={`font-bold ${textClass} capitalize`}>
+            {member.gender || "Not specified"}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
           <span className={`font-medium ${textClass}`}>Height</span>
           <span className={`font-bold ${textClass}`}>
             {member.height.value} {member.height.unit}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className={`font-medium ${textClass}`}>Weight</span>
+          <span className={`font-bold ${textClass}`}>
+            {member.weight.value} {member.weight.unit}
           </span>
         </div>
       </div>

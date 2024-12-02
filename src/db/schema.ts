@@ -8,6 +8,7 @@ export interface DBMember {
   training_start_date: string;
   training_arts: string[];
   bio: string;
+  gender: "male" | "female";
   weight_value: number;
   weight_unit: "kg" | "lbs";
   height_value: number;
@@ -43,4 +44,27 @@ export interface DBChat {
   is_read: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface DBNotification {
+  id: string;
+  recipient_id: string;
+  type: "direct_message" | "group_chat" | "billing" | "follow" | "training" | "achievement";
+  title: string;
+  message: string;
+  is_read: boolean;
+  // Optional fields based on notification type
+  sender_id?: string;        // For messages and follows
+  message_id?: string;       // For chat notifications
+  group_id?: string;         // For group chat
+  amount?: number;           // For billing
+  currency?: string;         // For billing
+  follow_count?: number;     // For grouped follows
+  grouping_period?: string;  // For grouped notifications
+  // Metadata for UI
+  target_route: string;      // Where clicking takes you
+  // Timestamps
+  created_at: string;
+  updated_at: string;
+  read_at?: string;         // When notification was read
 }

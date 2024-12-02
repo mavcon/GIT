@@ -12,6 +12,7 @@ export interface Member {
   trainingStartDate: string;
   trainingArts: TrainingArt[];
   bio: string;
+  gender: "male" | "female";
   weight: {
     value: number;
     unit: "kg" | "lbs";
