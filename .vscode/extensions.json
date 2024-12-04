@@ -1,0 +1,45 @@
+{
+  "recommendations": [
+    // Core Extensions
+    "dbaeumer.vscode-eslint",           // ESLint
+    "esbenp.prettier-vscode",           // Prettier
+    "bradlc.vscode-tailwindcss",        // Tailwind CSS IntelliSense
+    "ms-vscode.vscode-typescript-next", // TypeScript Nightly
+
+    // React/Web Development
+    "dsznajder.es7-react-js-snippets", // React Snippets
+    "formulahendry.auto-rename-tag",    // Auto Rename Tag
+    "naumovs.color-highlight",          // Color Highlight
+    "csstools.postcss",                 // PostCSS Language Support
+
+    // Git Integration
+    "eamodio.gitlens",                 // GitLens
+    "mhutchie.git-graph",              // Git Graph
+
+    // Testing
+    "orta.vscode-jest",                // Jest
+    "ms-vscode.test-adapter-converter", // Test Explorer UI
+
+    // Developer Experience
+    "christian-kohler.path-intellisense",  // Path Intellisense
+    "christian-kohler.npm-intellisense",   // NPM Intellisense
+    "streetsidesoftware.code-spell-checker", // Code Spell Checker
+    "wayou.vscode-todo-highlight",          // TODO Highlight
+    "aaron-bond.better-comments",           // Better Comments
+
+    // Documentation
+    "yzhang.markdown-all-in-one",      // Markdown Support
+    "bierner.markdown-preview-github-styles", // GitHub Markdown Preview
+
+    // Performance & Debug
+    "wix.vscode-import-cost",          // Import Cost
+    "msjsdiag.debugger-for-chrome",    // Chrome Debugger
+
+    // Optional but Recommended
+    "mgmcdermott.vscode-language-babel",    // Babel JavaScript
+    "mikestead.dotenv",                     // DotENV
+    "editorconfig.editorconfig",            // EditorConfig
+    "visualstudioexptteam.vscodeintellicode" // AI-assisted development
+  ],
+  "unwantedRecommendations": []
+}

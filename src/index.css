@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base theme configuration */
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --p: 199 84% 55%; /* light blue color: #38bdf8 */
+}
+
+/* Smooth transitions for theme changes */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-base-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-base-content/20;
+}
+
+/* Card hover effects */
+.card {
+  @apply transition-all duration-200;
+}
+
+.card:hover {
+  @apply shadow-lg;
+}
+
+/* Badge hover effects */
+.badge {
+  @apply transition-all duration-200;
+}
+
+.badge:hover {
+  @apply scale-105;
+}
+
+/* Button hover effects */
+.btn {
+  @apply transition-all duration-200;
+}
+
+.btn:active {
+  @apply scale-95;
+}
+
+/* Avatar hover effects */
+.avatar {
+  @apply transition-all duration-200;
+}
+
+.avatar:hover {
+  @apply scale-105;
+}
+
+/* Form control focus styles */
+.input:focus,
+.textarea:focus,
+.select:focus {
+  @apply outline-none;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Container padding for consistent spacing */
+.container {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+/* Card body padding */
+.card-body {
+  @apply p-4 sm:p-6;
+}
+
+/* Join component spacing */
+.join > * {
+  @apply m-0;
+}
+
+/* Badge spacing in groups */
+.badge + .badge {
+  @apply ml-2;
+}
+
+/* Tab transitions */
+.tabs .tab {
+  @apply transition-all duration-200;
+}
+
+/* Divider styling */
+.divider {
+  @apply my-4;
+}
+
+/* Form label spacing */
+.label {
+  @apply py-1;
+}
