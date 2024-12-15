@@ -1,322 +1,192 @@
-import React, { useState, useEffect, useRef } from "react";
-
-interface TimerSettings {
-  roundMinutes: number;
-  roundSeconds: number;
-  restMinutes: number;
-}
-
-interface NumberInputProps {
-  value: number;
-  onChange: (value: number) => void;
-  min?: number;
-  max?: number;
-  label: string;
-  disabled?: boolean;
-}
-
-const NumberInput: React.FC<NumberInputProps> = ({
-  value,
-  onChange,
-  min = 0,
-  max = 59,
-  label,
-  disabled = false
-}) => {
-  const increment = () => {
-    if (!disabled) {
-      onChange(Math.min(max, value + 1));
-    }
-  };
-
-  const decrement = () => {
-    if (!disabled) {
-      onChange(Math.max(min, value - 1));
-    }
-  };
-
-  return (
-    <div className={`text-center relative ${disabled ? 'opacity-50' : ''}`}>
-      <div className="relative">
-        <input
-          type="text"
-          value={value}
-          disabled={disabled}
-          onChange={(e) => {
-            if (!disabled) {
-              const val = parseInt(e.target.value) || 0;
-              onChange(Math.min(max, Math.max(min, val)));
-            }
-          }}
-          className="w-full text-6xl text-center px-4 py-1 bg-gray-900 border-2 border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed"
-        />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col justify-between h-full py-1 px-1">
-          <button
-            onClick={increment}
-            disabled={disabled}
-            className="text-gray-400 hover:text-white focus:outline-none text-lg disabled:cursor-not-allowed"
-          >
-            ▲
-          </button>
-          <button
-            onClick={decrement}
-            disabled={disabled}
-            className="text-gray-400 hover:text-white focus:outline-none text-lg disabled:cursor-not-allowed"
-          >
-            ▼
-          </button>
-        </div>
-      </div>
-      <div className="text-lg font-semibold text-gray-400 mt-0.5">{label}</div>
-    </div>
-  );
-};
+import React, { useState, useRef } from "react";
+import { TimerControls } from "../../components/timer/TimerControls";
+import { TimerDisplay } from "../../components/timer/TimerDisplay";
+import { PresetTimes } from "../../components/timer/PresetTimes";
+import { RestTimeControls } from "../../components/timer/RestTimeControls";
+import { ControlButtons } from "../../components/timer/ControlButtons";
+import { useTimer } from "../../hooks/useTimer";
 
 const Timer: React.FC = () => {
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
-  const [time, setTime] = useState<number>(0);
-  const [isResting, setIsResting] = useState<boolean>(false);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [settings, setSettings] = useState<TimerSettings>(() => {
-    const savedSettings = localStorage.getItem("timerSettings");
-    return savedSettings
-      ? JSON.parse(savedSettings)
-      : {
-          roundMinutes: 5,
-          roundSeconds: 0,
-          restMinutes: 1,
-        };
-  });
+  const [isEditingMinutes, setIsEditingMinutes] = useState<boolean>(false);
+  const [isEditingSeconds, setIsEditingSeconds] = useState<boolean>(false);
+  const minutesInputRef = useRef<HTMLInputElement>(null);
+  const secondsInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    audioRef.current = new Audio("/cookedtimer.mp3");
-    audioRef.current.volume = 1.0;
-    return () => {
-      if (audioRef.current) {
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  const {
+    time,
+    isResting,
+    isRunning,
+    isLastTenSeconds,
+    settings,
+    start,
+    pause,
+    reset,
+    setPresetTime,
+    adjustTime,
+    updateTime,
+    adjustRestTime,
+    updateRestTime
+  } = useTimer();
 
-  const playSound = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("/cookedtimer.mp3");
-      audioRef.current.volume = 1.0;
-    }
-    audioRef.current.currentTime = 0;
-    audioRef.current.play().catch(error => {
-      console.error("Error playing sound:", error);
-    });
-  };
-
-  const presetTimes = [5, 6, 7, 8, 10];
-
-  useEffect(() => {
-    localStorage.setItem("timerSettings", JSON.stringify(settings));
-  }, [settings]);
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isRunning && !isTransitioning) {
-      intervalId = setInterval(() => {
-        setTime((prevTime) => {
-          if (prevTime <= 0) {
-            playSound();
-            setIsTransitioning(true);
-            setTimeout(() => {
-              if (!isResting) {
-                setIsResting(true);
-                setTime(settings.restMinutes * 60);
-              } else {
-                setIsResting(false);
-                setTime(settings.roundMinutes * 60 + settings.roundSeconds);
-              }
-              setIsTransitioning(false);
-            }, 1000);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isRunning, isResting, settings, isTransitioning]);
-
-  useEffect(() => {
-    if (!isRunning) {
-      setTime(settings.roundMinutes * 60 + settings.roundSeconds);
-      setIsResting(false);
-    }
-  }, [settings, isRunning]);
+  const presetTimes = [4, 5, 6, 7, 8, 10];
 
   const handleStartStop = () => {
-    if (!isRunning && time === 0) {
-      setTime(settings.roundMinutes * 60 + settings.roundSeconds);
-      setIsResting(false);
+    if (isRunning) {
+      pause();
+    } else {
+      start();
     }
-    setIsRunning(!isRunning);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setIsTransitioning(false);
-    setTime(settings.roundMinutes * 60 + settings.roundSeconds);
-    setIsResting(false);
-  };
-
-  const formatTime = (totalSeconds: number): string => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  const setPresetTime = (minutes: number) => {
-    setSettings({
-      ...settings,
-      roundMinutes: minutes,
-      roundSeconds: 0,
-    });
-    handleReset();
   };
 
   if (!isFullScreen) {
     return (
       <button
         onClick={() => setIsFullScreen(true)}
-        className="px-6 py-2 rounded-lg font-semibold bg-blue-500 hover:bg-blue-600 text-white"
+        className="px-6 py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 text-white transition-all"
       >
         Open Timer
       </button>
     );
   }
 
-  const [minutes, seconds] = formatTime(time).split(":");
-
   return (
-    <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
-      <div className="w-full h-full p-2 flex flex-col">
-        <div className="w-full flex-grow-0">
-          <div className="flex justify-between items-center gap-0.5">
-            {presetTimes.map((mins) => (
-              <button
-                key={mins}
-                onClick={() => setPresetTime(mins)}
-                disabled={isResting || isRunning}
-                className={`flex-1 py-0.5 rounded-lg font-semibold text-lg transition-all ${
-                  settings.roundMinutes === mins
-                    ? "bg-blue-600 text-white"
-                    : "bg-blue-100 hover:bg-blue-200 text-blue-800"
-                } ${(isResting || isRunning) ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {mins}min
-              </button>
-            ))}
+    <div className="fixed inset-0 bg-[#0F172A] z-[9999]">
+      <div className="w-full h-full flex flex-col justify-between p-[1vw]">
+        <div>
+          <div className="flex justify-between items-center gap-[1vw]">
+            <PresetTimes
+              presetTimes={presetTimes}
+              currentMinutes={settings.roundMinutes}
+              isDisabled={isResting || isRunning}
+              onSelect={setPresetTime}
+            />
             <button
               onClick={() => setIsFullScreen(false)}
-              className="p-1 w-8 h-8 flex items-center justify-center text-lg font-bold text-white hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+              className="h-[5vw] w-[5vw] text-lg font-bold text-white hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all bg-gray-800/50 flex items-center justify-center"
             >
               ✕
             </button>
           </div>
-        </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <h2
-            className={`text-3xl sm:text-5xl md:text-6xl font-bold ${
-              isResting ? "text-blue-400" : "text-white"
-            }`}
-          >
-            {isResting ? "Rest Time" : "Round Time"}
-          </h2>
-
-          <div className="flex sm:flex-row flex-col items-center justify-center font-mono font-bold text-white leading-[0.7] my-4">
-            <div className="text-[min(58vw,70vh)] sm:text-[min(48vw,70vh)]">
-              {minutes}
+          {/* Timer Display */}
+          <div className="text-center animate-slide-up mb-2">
+            <div className={`inline-block px-4 py-1 text-[3.4vw] font-medium mb-8 transition-colors ${
+              isResting
+                ? "text-blue-300"
+                : "text-white"
+            }`}>
+              {isResting ? "REST TIME" : "ROUND TIME"}
             </div>
-            <div className="text-[min(15vw,20vh)] sm:text-[min(15vw,60vh)] sm:mx-2 mx-0 sm:rotate-0 rotate-90 sm:my-0 -my-2">
-              :
-            </div>
-            <div className="text-[min(58vw,70vh)] sm:text-[min(48vw,70vh)]">
-              {seconds}
-            </div>
-          </div>
-
-          <div className="w-full">
-            <div className="grid grid-cols-2 gap-1 w-full max-w-xl mx-auto">
-              <NumberInput
-                value={settings.roundMinutes}
-                onChange={(value) =>
-                  setSettings({
-                    ...settings,
-                    roundMinutes: value,
-                  })
-                }
-                min={0}
-                label="MIN"
-                disabled={isResting || isRunning}
-              />
-              <NumberInput
-                value={settings.roundSeconds}
-                onChange={(value) =>
-                  setSettings({
-                    ...settings,
-                    roundSeconds: value,
-                  })
-                }
-                min={0}
-                max={59}
-                label="SEC"
-                disabled={isResting || isRunning}
-              />
-            </div>
-
-            <div className="flex items-stretch justify-between gap-1 w-full max-w-xl mx-auto h-12 mt-1">
-              <div className="flex items-center bg-gray-900 rounded-lg px-2">
-                <input
-                  type="number"
-                  value={settings.restMinutes}
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col justify-between h-[22vw] my-1">
+                <button
+                  onClick={() => adjustTime('minutes', true)}
                   disabled={isRunning}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      restMinutes: Math.max(0, parseInt(e.target.value) || 0),
-                    })
-                  }
-                  className="w-14 text-xl text-center bg-transparent text-white border-b-2 border-gray-700 focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed disabled:opacity-50"
-                  min="0"
-                />
-                <span className="text-base text-gray-500 ml-1">min rest</span>
+                  className="text-[3.4vw] text-gray-600 hover:text-white transition-colors disabled:opacity-50 leading-[0.6]"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => adjustTime('minutes', false)}
+                  disabled={isRunning}
+                  className="text-[3.4vw] text-gray-600 hover:text-white transition-colors disabled:opacity-50 leading-[0.6]"
+                >
+                  ▼
+                </button>
               </div>
 
-              <button
-                onClick={handleStartStop}
-                className={`flex-1 rounded-lg text-xl font-semibold transition-all ${
-                  isRunning
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "bg-green-500 hover:bg-green-600 text-white"
-                }`}
-              >
-                {isRunning ? "Stop" : "Start"}
-              </button>
+              <div className="font-mono text-[34vw] font-bold leading-[0.6] flex items-center justify-center flex-grow">
+                <div className="flex-grow flex justify-end">
+                  {isEditingMinutes && !isRunning ? (
+                    <input
+                      ref={minutesInputRef}
+                      type="number"
+                      value={Math.floor(time / 60)}
+                      onChange={(e) => updateTime('minutes', e.target.value)}
+                      onBlur={() => setIsEditingMinutes(false)}
+                      className={`bg-transparent text-right outline-none font-mono text-[34vw] font-bold leading-[0.6] p-0 m-0 box-content h-[1em] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        isResting ? 'text-blue-300' : 'text-white'
+                      }`}
+                      min="0"
+                      max={99}
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      onClick={() => !isRunning && setIsEditingMinutes(true)}
+                      className={`cursor-pointer select-none ${
+                        isResting ? 'text-blue-300' : 'text-white'
+                      }`}
+                    >
+                      {Math.floor(time / 60).toString().padStart(2, '0')}
+                    </span>
+                  )}
+                </div>
+                <span className={`mx-[1vw] ${isResting ? 'text-blue-300' : 'text-white'}`}>:</span>
+                <div className="flex-grow">
+                  {isEditingSeconds && !isRunning ? (
+                    <input
+                      ref={secondsInputRef}
+                      type="number"
+                      value={time % 60}
+                      onChange={(e) => updateTime('seconds', e.target.value)}
+                      onBlur={() => setIsEditingSeconds(false)}
+                      className={`bg-transparent text-left outline-none font-mono text-[34vw] font-bold leading-[0.6] p-0 m-0 box-content h-[1em] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        isResting ? 'text-blue-300' : 'text-white'
+                      }`}
+                      min="0"
+                      max={59}
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      onClick={() => !isRunning && setIsEditingSeconds(true)}
+                      className={`cursor-pointer select-none ${
+                        isLastTenSeconds ? 'animate-flash' : ''
+                      } ${isResting ? 'text-blue-300' : 'text-white'}`}
+                    >
+                      {(time % 60).toString().padStart(2, '0')}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-              <button
-                onClick={handleReset}
-                className="px-6 rounded-lg text-xl font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all"
-              >
-                Reset
-              </button>
+              <div className="flex flex-col justify-between h-[22vw] my-1">
+                <button
+                  onClick={() => adjustTime('seconds', true)}
+                  disabled={isRunning}
+                  className="text-[3.4vw] text-gray-600 hover:text-white transition-colors disabled:opacity-50 leading-[0.6]"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => adjustTime('seconds', false)}
+                  disabled={isRunning}
+                  className="text-[3.4vw] text-gray-600 hover:text-white transition-colors disabled:opacity-50 leading-[0.6]"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Control Buttons and Rest Time Input */}
+        <div className="flex gap-[1vw] animate-slide-up [animation-delay:300ms]">
+          <RestTimeControls
+            value={settings.restMinutes}
+            isDisabled={isRunning}
+            onIncrement={() => adjustRestTime(true)}
+            onDecrement={() => adjustRestTime(false)}
+            onChange={updateRestTime}
+          />
+          <ControlButtons
+            isRunning={isRunning}
+            time={time}
+            onStartStop={handleStartStop}
+            onReset={reset}
+          />
         </div>
       </div>
     </div>

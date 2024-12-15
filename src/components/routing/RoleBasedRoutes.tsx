@@ -15,7 +15,7 @@ interface RoleBasedRoutesProps {
 const RoleBasedRoutes: React.FC<RoleBasedRoutesProps> = ({ userRole, currentUserId }) => {
   return (
     <Routes>
-      <Route path="/" element={<Members currentUserId={currentUserId} />} />
+      <Route path="/*" element={<Members currentUserId={currentUserId} />} />
       <Route path="/stats" element={<Stats currentUserId={currentUserId} />} />
       <Route path="/members/*" element={<Members currentUserId={currentUserId} />} />
       <Route path="/dojos" element={<Dojos currentUserId={currentUserId} />} />
@@ -23,6 +23,7 @@ const RoleBasedRoutes: React.FC<RoleBasedRoutesProps> = ({ userRole, currentUser
       <Route path="/settings" element={<Settings currentUserId={currentUserId} />} />
       <Route path="/chat/:memberId" element={<Chat currentUserId={currentUserId} />} />
       <Route path="/chat/group/:groupId" element={<Chat currentUserId={currentUserId} />} />
+      <Route path="*" element={<Members currentUserId={currentUserId} />} />
     </Routes>
   );
 };
