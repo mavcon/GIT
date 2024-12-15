@@ -21,7 +21,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
   min = 0,
   max = 59,
   label,
-  disabled = false,
+  disabled = false
 }) => {
   const increment = () => {
     if (!disabled) {
@@ -36,7 +36,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
   };
 
   return (
-    <div className={`text-center relative ${disabled ? "opacity-50" : ""}`}>
+    <div className={`text-center relative ${disabled ? 'opacity-50' : ''}`}>
       <div className="relative">
         <input
           type="text"
@@ -48,9 +48,9 @@ const NumberInput: React.FC<NumberInputProps> = ({
               onChange(Math.min(max, Math.max(min, val)));
             }
           }}
-          className="w-full text-6xl text-center px-4 py-2 bg-gray-900 border-2 border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed"
+          className="w-full text-6xl text-center px-4 py-1 bg-gray-900 border-2 border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col justify-between h-full py-2 px-1">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col justify-between h-full py-1 px-1">
           <button
             onClick={increment}
             disabled={disabled}
@@ -67,7 +67,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
           </button>
         </div>
       </div>
-      <div className="text-lg font-semibold text-gray-400 mt-1">{label}</div>
+      <div className="text-lg font-semibold text-gray-400 mt-0.5">{label}</div>
     </div>
   );
 };
@@ -106,7 +106,7 @@ const Timer: React.FC = () => {
       audioRef.current.volume = 1.0;
     }
     audioRef.current.currentTime = 0;
-    audioRef.current.play().catch((error) => {
+    audioRef.current.play().catch(error => {
       console.error("Error playing sound:", error);
     });
   };
@@ -175,7 +175,9 @@ const Timer: React.FC = () => {
   const formatTime = (totalSeconds: number): string => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const setPresetTime = (minutes: number) => {
@@ -202,50 +204,54 @@ const Timer: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
-      <div className="w-full h-full p-4 flex flex-col">
+      <div className="w-full h-full p-2 flex flex-col">
         <div className="w-full flex-grow-0">
-          <div className="flex justify-between items-center gap-1">
+          <div className="flex justify-between items-center gap-0.5">
             {presetTimes.map((mins) => (
               <button
                 key={mins}
                 onClick={() => setPresetTime(mins)}
                 disabled={isResting || isRunning}
-                className={`flex-1 py-1 rounded-lg font-semibold text-xl transition-all ${
+                className={`flex-1 py-0.5 rounded-lg font-semibold text-lg transition-all ${
                   settings.roundMinutes === mins
                     ? "bg-blue-600 text-white"
                     : "bg-blue-100 hover:bg-blue-200 text-blue-800"
-                } ${isResting || isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${(isResting || isRunning) ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {mins}min
               </button>
             ))}
             <button
               onClick={() => setIsFullScreen(false)}
-              className="p-2 w-10 h-10 flex items-center justify-center text-xl font-bold text-white hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+              className="p-1 w-8 h-8 flex items-center justify-center text-lg font-bold text-white hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
             >
               ✕
             </button>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center gap-0 min-h-0">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <h2
-            className={`text-3xl font-bold flex-grow-0 mt-4 ${
+            className={`text-3xl sm:text-5xl md:text-6xl font-bold ${
               isResting ? "text-blue-400" : "text-white"
             }`}
           >
             {isResting ? "Rest Time" : "Round Time"}
           </h2>
 
-          <div className="flex sm:flex-row flex-col items-center justify-center font-mono font-bold text-white leading-none flex-grow -mt-4">
-            <div className="text-[min(108vh,48vw)] sm:text-[min(70vh,40vw)]">{minutes}</div>
-            <div className="text-[min(25vh,20vw)] sm:text-[min(70vh,40vw)] sm:mx-4 mx-0 sm:rotate-0 rotate-90 sm:my-0 -my-4">
+          <div className="flex sm:flex-row flex-col items-center justify-center font-mono font-bold text-white leading-[0.7] my-4">
+            <div className="text-[min(58vw,70vh)] sm:text-[min(48vw,70vh)]">
+              {minutes}
+            </div>
+            <div className="text-[min(15vw,20vh)] sm:text-[min(15vw,60vh)] sm:mx-2 mx-0 sm:rotate-0 rotate-90 sm:my-0 -my-2">
               :
             </div>
-            <div className="text-[min(108vh,48vw)] sm:text-[min(70vh,40vw)]">{seconds}</div>
+            <div className="text-[min(58vw,70vh)] sm:text-[min(48vw,70vh)]">
+              {seconds}
+            </div>
           </div>
 
-          <div className="w-full flex-grow-0">
+          <div className="w-full">
             <div className="grid grid-cols-2 gap-1 w-full max-w-xl mx-auto">
               <NumberInput
                 value={settings.roundMinutes}
@@ -274,8 +280,8 @@ const Timer: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-stretch justify-between gap-1 w-full max-w-xl mx-auto h-14">
-              <div className="flex items-center bg-gray-900 rounded-lg px-3">
+            <div className="flex items-stretch justify-between gap-1 w-full max-w-xl mx-auto h-12 mt-1">
+              <div className="flex items-center bg-gray-900 rounded-lg px-2">
                 <input
                   type="number"
                   value={settings.restMinutes}
@@ -286,15 +292,15 @@ const Timer: React.FC = () => {
                       restMinutes: Math.max(0, parseInt(e.target.value) || 0),
                     })
                   }
-                  className="w-16 text-2xl text-center bg-transparent text-white border-b-2 border-gray-700 focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-14 text-xl text-center bg-transparent text-white border-b-2 border-gray-700 focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-not-allowed disabled:opacity-50"
                   min="0"
                 />
-                <span className="text-lg text-gray-500 ml-2">min rest</span>
+                <span className="text-base text-gray-500 ml-1">min rest</span>
               </div>
 
               <button
                 onClick={handleStartStop}
-                className={`flex-1 rounded-lg text-2xl font-semibold transition-all ${
+                className={`flex-1 rounded-lg text-xl font-semibold transition-all ${
                   isRunning
                     ? "bg-red-500 hover:bg-red-600 text-white"
                     : "bg-green-500 hover:bg-green-600 text-white"
@@ -305,7 +311,7 @@ const Timer: React.FC = () => {
 
               <button
                 onClick={handleReset}
-                className="px-8 rounded-lg text-2xl font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all"
+                className="px-6 rounded-lg text-xl font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all"
               >
                 Reset
               </button>
